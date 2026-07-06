@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BizCore — Xem thiết kế (tĩnh)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/variables.css" />
+<link rel="stylesheet" href="css/base.css" />
+<link rel="stylesheet" href="css/layout.css" />
+<link rel="stylesheet" href="css/components.css" />
+<link rel="stylesheet" href="css/pages.css" />
+<link rel="stylesheet" href="css/ai.css" />
+<link rel="stylesheet" href="css/effects.css" />
+<style>
+  .preview-flag{ position:fixed; top:0; left:0; right:0; z-index:99999; background:var(--graphite); color:#fff;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:.06em; text-align:center; padding:5px; }
+  body{ padding-top:26px; }
+  .header{ top:26px !important; }
+  .sidebar{ top:26px !important; }
+</style>
+</head>
+<body>
+<div class="preview-flag">BẢN XEM THIẾT KẾ (TĨNH) · dữ liệu mẫu · app thật ở /cortex/ (đăng nhập an0@cortex.vn / 123456)</div>
+
+<svg width="0" height="0" style="position:absolute"><defs>
+  <symbol id="cortexMark" viewBox="0 0 24 24">
+    <path d="M12 12L6.5 7.5M12 12l5.5-4.5M12 12l-4.5 5.5M12 12l5 5" stroke="currentColor" stroke-width="1.4" opacity=".65"/>
+    <circle cx="12" cy="12" r="2.6" fill="currentColor"/>
+    <circle cx="6.2" cy="7.2" r="1.7" fill="currentColor" opacity=".9"/><circle cx="17.8" cy="7.2" r="1.7" fill="currentColor" opacity=".9"/>
+    <circle cx="7.2" cy="17.6" r="1.7" fill="currentColor" opacity=".9"/><circle cx="17.2" cy="17.2" r="1.7" fill="currentColor" opacity=".9"/>
+  </symbol>
+</defs></svg>
+
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-header"><div class="sidebar-logo"><div class="logo-icon"><svg viewBox="0 0 24 24" width="22" height="22" style="color:#fff"><use href="#cortexMark"/></svg></div><span class="logo-text">Biz<b>Core</b></span></div></div>
+    <nav class="sidebar-nav">
+      <a class="sidebar-nav-item active" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span class="nav-label">Trung tâm điều hành</span></a>
+      <a class="sidebar-nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span class="nav-label">Nhân sự</span></a>
+      <a class="sidebar-nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="nav-label">Phòng ban</span></a>
+      <a class="sidebar-nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span class="nav-label">Chấm công</span></a>
+      <a class="sidebar-nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg><span class="nav-label">Bảng lương</span></a>
+      <div class="sidebar-section-label"><span>CRM</span></div>
+      <a class="sidebar-nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><span class="nav-label">Khách hàng</span></a>
+      <a class="sidebar-nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg><span class="nav-label">Cơ hội</span></a>
+      <a class="sidebar-nav-item" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg><span class="nav-label">Báo cáo</span></a>
+      <div class="sidebar-section-label"><span>Trí tuệ</span></div>
+      <a class="sidebar-nav-item nav-ai" href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l2.2 5.5L20 10l-5.8 1.5L12 17l-2.2-5.5L4 10l5.8-1.5z"/></svg><span class="nav-label">Mô phỏng What-If</span></a>
+    </nav>
+    <div class="sidebar-footer"><div class="sidebar-user"><div class="user-avatar-sm">TN</div><div class="user-info"><div class="user-name">Trọng Tín</div><div class="user-role">Giám đốc</div></div>
+      <button class="btn-logout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="17" height="17"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button></div></div>
+  </aside>
+
+  <main class="main-content">
+    <header class="header">
+      <div class="header-left"><div class="header-title"><h2>Trung tâm điều hành</h2></div></div>
+      <div class="header-right">
+        <div class="header-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" width="16" height="16"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input placeholder="Tìm nhân sự, khách hàng, cơ hội…"><kbd>⌘K</kbd></div>
+        <button class="notification-btn btn-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" width="19" height="19"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg><span class="notification-badge">3</span></button>
+        <div class="user-avatar">TN</div>
+      </div>
+    </header>
+    <div class="content-area">
+
+      <div class="page-header">
+        <div>
+          <div style="font-family:var(--font-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted)">THỨ NĂM · 02.07.2026</div>
+          <h1 class="shiny-text" style="margin-top:8px">Chào buổi chiều, Trọng Tín.</h1>
+          <p>BizCore giúp bạn <span class="login-tw" data-typewriter="điều hành nhân sự & lương|quản trị khách hàng & cơ hội|mô phỏng quyết định tài chính|ra lệnh cho trợ lý AI"></span></p>
+        </div>
+        <div class="page-header-actions">
+          <button class="btn btn-secondary btn-sm btn-shine">⤓ Xuất Excel</button>
+          <button class="btn btn-slate btn-sm">✦ Hỏi trợ lý AI</button>
+        </div>
+      </div>
+
+      <div class="stat-cards-grid">
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div><span class="stat-card-trend up"><svg viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15"/></svg>15</span></div><div class="stat-card-value">15</div><div class="stat-card-label">Nhân sự đang làm việc</div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-card-icon neutral"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div></div><div class="stat-card-value">392.943.750 ₫</div><div class="stat-card-label">Quỹ lương tháng 07</div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-card-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg></div><span class="stat-card-trend up"><svg viewBox="0 0 24 24"><polyline points="6 15 12 9 18 15"/></svg>12</span></div><div class="stat-card-value">6.695.500.000 ₫</div><div class="stat-card-label">Dự báo pipeline (trọng số)</div></div>
+        <div class="stat-card"><div class="stat-card-header"><div class="stat-card-icon slate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><span class="stat-card-trend down"><svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>4</span></div><div class="stat-card-value">25%</div><div class="stat-card-label">Tỷ lệ chốt deal</div></div>
+      </div>
+
+      <div class="dashboard-grid mt-6">
+        <div class="card">
+          <div class="card-header"><h3>Trung tâm điều hành · Tín hiệu ưu tiên</h3><span class="text-muted" style="font-family:var(--font-mono);font-size:11px">3 TÍN HIỆU</span></div>
+          <div class="card-body"><div class="signals">
+            <div class="signal-row"><span class="signal-sev d"></span><div class="signal-main"><div class="signal-title">3 cơ hội trị giá 3.360.000.000 ₫ đã quá hạn chốt</div><div class="signal-why">Đã qua ngày dự kiến đóng nhưng chưa chuyển trạng thái — nguy cơ trượt.</div><div class="signal-reason">Vì sao: Quá hạn expected_close_date &amp; vẫn ở trạng thái mở.</div><div class="signal-act"><a class="btn btn-ghost btn-sm" href="#">Xem cơ hội →</a></div></div></div>
+            <div class="signal-row"><span class="signal-sev w"></span><div class="signal-main"><div class="signal-title">Tỷ lệ chốt deal đang thấp: 25%</div><div class="signal-why">Chỉ 1/4 cơ hội đã đóng là thắng.</div><div class="signal-reason">Vì sao: Win rate &lt; 30% — cần rà lại phễu bán hàng.</div><div class="signal-act"><a class="btn btn-ghost btn-sm" href="#">Phân tích phễu →</a></div></div></div>
+            <div class="signal-row"><span class="signal-sev i"></span><div class="signal-main"><div class="signal-title">Lê Hoàng Cường đi trễ 5 lần trong tháng</div><div class="signal-why">Vượt ngưỡng cảnh báo (4 lần/tháng) của chính sách chấm công.</div><div class="signal-act"><a class="btn btn-ghost btn-sm" href="#">Xem chấm công →</a></div></div></div>
+          </div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Chấm công hôm nay</h3></div>
+          <div class="card-body"><div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;background:var(--color-success-bg)"><span style="font-weight:600;color:var(--color-success)">Đã chấm công</span><span style="font-family:var(--font-mono);font-weight:600;font-size:20px;color:var(--color-success)">5</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;background:var(--color-warning-bg)"><span style="font-weight:600;color:var(--color-warning)">Đi muộn</span><span style="font-family:var(--font-mono);font-weight:600;font-size:20px;color:var(--color-warning)">1</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:10px;background:var(--bg-hover)"><span style="font-weight:600">Tổng nhân sự</span><span style="font-family:var(--font-mono);font-weight:600;font-size:20px">15</span></div>
+          </div></div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid mt-6">
+        <div class="card">
+          <div class="card-header"><h3>Nhân viên theo phòng ban</h3></div>
+          <div class="card-body">
+            <svg viewBox="0 0 420 220" width="100%" height="220" style="overflow:visible;font-family:var(--font-mono)">
+              <g stroke="var(--border-subtle)"><line x1="40" y1="20" x2="40" y2="180"/><line x1="40" y1="180" x2="410" y2="180"/></g>
+              <g fill="var(--brand)">
+                <rect x="60" y="80" width="46" height="100" rx="4"/><rect x="130" y="80" width="46" height="100" rx="4" fill="#33417a"/><rect x="200" y="80" width="46" height="100" rx="4" fill="#a97c3f"/><rect x="270" y="80" width="46" height="100" rx="4" fill="#1a6a63"/><rect x="340" y="113" width="46" height="67" rx="4" fill="#3d4d90"/>
+              </g>
+              <g fill="var(--text-muted)" font-size="11" text-anchor="middle">
+                <text x="83" y="196">Kinh doanh</text><text x="153" y="196">Marketing</text><text x="223" y="196">Kỹ thuật</text><text x="293" y="196">Nhân sự</text><text x="363" y="196">Tài chính</text>
+              </g>
+              <g fill="var(--text-primary)" font-size="12" font-weight="600" text-anchor="middle"><text x="83" y="72">3</text><text x="153" y="72">3</text><text x="223" y="72">3</text><text x="293" y="72">3</text><text x="363" y="105">2</text></g>
+            </svg>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Cơ hội theo giai đoạn</h3></div>
+          <div class="card-body" style="display:flex;align-items:center;gap:22px;justify-content:center">
+            <svg viewBox="0 0 120 120" width="140" height="140">
+              <circle cx="60" cy="60" r="46" fill="none" stroke="var(--border-subtle)" stroke-width="16"/>
+              <circle cx="60" cy="60" r="46" fill="none" stroke="#0c6b57" stroke-width="16" stroke-dasharray="24 265" stroke-dashoffset="0" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="46" fill="none" stroke="#c78a3c" stroke-width="16" stroke-dasharray="72 217" stroke-dashoffset="-24" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="46" fill="none" stroke="#a97c3f" stroke-width="16" stroke-dasharray="48 241" stroke-dashoffset="-96" transform="rotate(-90 60 60)"/>
+              <circle cx="60" cy="60" r="46" fill="none" stroke="#bb362b" stroke-width="16" stroke-dasharray="72 217" stroke-dashoffset="-144" transform="rotate(-90 60 60)"/>
+              <text x="60" y="58" text-anchor="middle" font-family="var(--font-mono)" font-size="20" font-weight="600" fill="var(--text-primary)">12</text>
+              <text x="60" y="74" text-anchor="middle" font-size="9" fill="var(--text-muted)">cơ hội</text>
+            </svg>
+            <div style="display:flex;flex-direction:column;gap:8px;font-size:12.5px">
+              <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#0c6b57;margin-right:7px"></i>Thành công · 1</span>
+              <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#c78a3c;margin-right:7px"></i>Đàm phán · 3</span>
+              <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#a97c3f;margin-right:7px"></i>Báo giá · 2</span>
+              <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#bb362b;margin-right:7px"></i>Thất bại · 3</span>
+              <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#8d8377;margin-right:7px"></i>Lead · 3</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<button class="ai-fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="24" height="24"><path d="M12 3l2.2 5.5L20 10l-5.8 1.5L12 17l-2.2-5.5L4 10l5.8-1.5z"/></svg><span class="ai-fab-badge"></span></button>
+<script src="js/effects.js"></script>
+</body>
+</html>

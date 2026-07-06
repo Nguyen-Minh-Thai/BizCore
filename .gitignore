@@ -1,0 +1,6 @@
+# Local configuration
+app/js/config.local.js
+
+# OS files
+.DS_Store
+Thumbs.db

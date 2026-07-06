@@ -1,0 +1,45 @@
+/* ===== BizCore v3 — Effects (shiny text · typewriter · shine button · bento) ===== */
+
+/* Shiny sweeping text — an toàn: chữ luôn hiện, chỉ thêm hiệu ứng khi trình duyệt hỗ trợ */
+.shiny-text{ color:var(--text-primary); }
+@supports ((-webkit-background-clip:text) or (background-clip:text)){
+  .shiny-text{
+    background:linear-gradient(110deg, var(--text-primary) 0%, var(--text-primary) 42%, var(--brand) 50%, var(--text-primary) 58%, var(--text-primary) 100%);
+    background-size:220% 100%;
+    -webkit-background-clip:text; background-clip:text;
+    color:transparent; -webkit-text-fill-color:transparent;
+    animation:shinytext 4.5s linear infinite;
+  }
+}
+@keyframes shinytext{ 0%{ background-position:120% 0; } 100%{ background-position:-120% 0; } }
+
+/* Typewriter */
+.login-tw{ color:var(--brand); font-weight:700; }
+.tw-cursor{ display:inline-block; width:2px; height:1em; background:currentColor; margin-left:2px; vertical-align:-2px; animation:twblink 1s step-end infinite; }
+@keyframes twblink{ 50%{ opacity:0; } }
+
+/* Shine button (periodic diagonal sweep) */
+.btn-shine{ position:relative; overflow:hidden; }
+.btn-shine::after{
+  content:''; position:absolute; top:-50%; left:-60%; width:38%; height:200%;
+  background:linear-gradient(120deg, transparent, rgba(255,255,255,.42), transparent);
+  transform:skewX(-20deg); pointer-events:none;
+  animation:btnshine 3.4s ease-in-out infinite;
+}
+@keyframes btnshine{ 0%{ left:-60%; } 62%,100%{ left:135%; } }
+
+/* Bento / social grid */
+.bento{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+.bento-item{ background:var(--panel); border:1px solid var(--border-color); border-radius:var(--border-radius-lg); padding:20px; box-shadow:var(--shadow-sm); transition:transform var(--transition-fast), box-shadow var(--transition-fast); }
+.bento-item:hover{ transform:translateY(-3px); box-shadow:var(--shadow-md); }
+.bento-item.col2{ grid-column:span 2; }
+.bento-item.row2{ grid-row:span 2; }
+@media(max-width:900px){ .bento{ grid-template-columns:1fr 1fr; } .bento-item.col2{ grid-column:span 2; } }
+@media(max-width:560px){ .bento{ grid-template-columns:1fr; } .bento-item.col2{ grid-column:span 1; } }
+
+/* Gradient-glow accent card (for AI/premium blocks) */
+.glow-card{ position:relative; }
+.glow-card::before{ content:''; position:absolute; inset:-1px; border-radius:inherit; padding:1px;
+  background:linear-gradient(130deg, var(--brand), var(--slate), var(--brand));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude; opacity:.5; pointer-events:none; }

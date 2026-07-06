@@ -1,0 +1,90 @@
+/* ===== BizCore ERP — Design Tokens · "Graphite Enterprise" =====
+   Light, cool graphite + evergreen (action) + slate-indigo (AI).
+   Giữ nguyên tên biến cũ (map sang light) + thêm alias brand mới. */
+:root {
+  /* ---- Brand ---- */
+  --brand:#0c6b57;         /* evergreen — hành động/tăng trưởng */
+  --brand-700:#0a5647;
+  --brand-600:#0e7a63;
+  --brand-050:#e7f2ef;
+  --slate:#33417a;         /* slate-indigo — AI / trí tuệ */
+  --slate-600:#3d4d90;
+  --slate-050:#ecedf6;
+  --brass:#a97c3f;
+  --graphite:#0f1720;      /* panel tối: sidebar brand / login */
+
+  /* ---- Surfaces (map biến cũ → light) ---- */
+  --bg-primary:#f4f5f7;    /* canvas trang */
+  --bg-secondary:#fafbfc;
+  --bg-tertiary:#ffffff;   /* card */
+  --bg-elevated:#ffffff;
+  --bg-hover:#eef0f3;
+  --bg-glass:rgba(244,245,247,.85);
+  --bg-glass-border:#e5e8ec;
+  --panel:#ffffff;
+  --panel-2:#fafbfc;
+
+  /* ---- Accent (map cũ) ---- */
+  --accent-primary:#0c6b57;
+  --accent-secondary:#33417a;
+  --accent-gradient:linear-gradient(135deg,#0e7a63,#0a5647);
+  --accent-glow:0 0 0 3px rgba(12,107,87,.15);
+
+  /* ---- Semantic ---- */
+  --color-success:#0c6b57; --color-success-bg:#e7f2ef;
+  --color-warning:#9a6b12; --color-warning-bg:#f6efdd;
+  --color-danger:#bb362b;  --color-danger-bg:#f8eae8;
+  --color-info:#33417a;    --color-info-bg:#ecedf6;
+
+  /* ---- Text ---- */
+  --text-primary:#0f1419;  /* graphite ink */
+  --text-secondary:#5a626c;
+  --text-tertiary:#8b929b;
+  --text-accent:#0c6b57;
+  --text-muted:#6a727d;
+
+  /* ---- Borders ---- */
+  --border-color:#e5e8ec;
+  --border-color-hover:#d3d9df;
+  --border-subtle:#eef0f3;
+
+  /* ---- Typography ---- */
+  --font-family:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,'Cascadia Code',monospace;
+  --font-xs:0.75rem;
+  --font-sm:0.8125rem;
+  --font-base:0.875rem;
+  --font-md:1rem;
+  --font-lg:1.125rem;
+  --font-xl:1.25rem;
+  --font-2xl:1.5rem;
+  --font-3xl:1.875rem;
+  --font-4xl:2.25rem;
+
+  /* ---- Spacing (8pt) ---- */
+  --space-1:0.25rem; --space-2:0.5rem; --space-3:0.75rem; --space-4:1rem;
+  --space-5:1.25rem; --space-6:1.5rem; --space-8:2rem; --space-10:2.5rem; --space-12:3rem;
+
+  /* ---- Layout ---- */
+  --sidebar-width:250px;
+  --sidebar-collapsed-width:72px;
+  --header-height:64px;
+
+  /* ---- Radius ---- */
+  --border-radius-sm:7px;
+  --border-radius-md:10px;
+  --border-radius-lg:14px;
+  --border-radius-xl:18px;
+  --border-radius-full:9999px;
+
+  /* ---- Shadows (light) ---- */
+  --shadow-sm:0 1px 2px rgba(15,20,25,.05), 0 1px 2px rgba(15,20,25,.04);
+  --shadow-md:0 6px 16px rgba(15,20,25,.06), 0 2px 6px rgba(15,20,25,.05);
+  --shadow-lg:0 14px 32px rgba(15,20,25,.09);
+  --shadow-glow:0 0 0 3px rgba(12,107,87,.12);
+
+  /* ---- Transitions ---- */
+  --transition-fast:150ms ease;
+  --transition-normal:220ms ease;
+  --transition-slow:340ms ease;
+}
