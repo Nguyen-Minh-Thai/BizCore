@@ -40,9 +40,14 @@ window.Components = {
   },
 
   // ===== CONFIRM =====
-  showConfirm(message, onConfirm) {
+  showConfirm(title, message, onConfirm) {
+    if (typeof message === 'function') {
+      onConfirm = message;
+      message = title;
+      title = 'Xác nhận';
+    }
     this.showModal({
-      title: 'Xác nhận',
+      title: title || 'Xác nhận',
       content: `<p style="font-size:var(--font-base);color:var(--text-secondary)">${message}</p>`,
       size: 'sm',
       footer: `<button class="btn btn-ghost" id="confirmCancel">Hủy</button>

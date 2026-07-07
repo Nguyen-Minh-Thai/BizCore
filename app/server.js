@@ -20,7 +20,7 @@ const MIME_TYPES = {
 
 const server = http.createServer((req, res) => {
   let pathname = decodeURIComponent(req.url.split('?')[0]);
-  let filePath = path.join(__dirname, pathname === '/' ? 'index.html' : pathname);
+  let filePath = path.join(__dirname, pathname);
 
   try {
     if (pathname.endsWith('/') || fs.statSync(filePath).isDirectory()) {

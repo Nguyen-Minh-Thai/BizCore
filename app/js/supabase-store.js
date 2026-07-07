@@ -95,6 +95,8 @@ window.Store = {
         departmentId: d.department_id, 
         baseSalary: isSensitive ? Number(d.base_salary) : null, // Mask salary
         password: null, // Always mask password
+        hireDate: d.hire_date, // <-- Map ngày vào
+        exitDate: d.exit_date, // <-- Map ngày rời
         createdAt: d.created_at
       };
     });
@@ -103,7 +105,7 @@ window.Store = {
   async getEmployee(id) {
     const { data, error } = await supabaseClient.from('employees').select('*').eq('id', id).single();
     if (error || !data) return null;
-    return {...data, departmentId: data.department_id, baseSalary: Number(data.base_salary), createdAt: data.created_at};
+    return {...data, departmentId: data.department_id, baseSalary: Number(data.base_salary), hireDate: data.hire_date, exitDate: data.exit_date, createdAt: data.created_at}; // <-- Map ngày vào/rời khi lấy 1 NV
   },
 
   async addEmployee(employeeData) {
@@ -116,7 +118,9 @@ window.Store = {
       base_salary: employeeData.baseSalary,
       status: employeeData.status || 'active',
       role: employeeData.role || 'employee',
-      password: employeeData.password || '123456'
+      password: employeeData.password || '123456',
+      hire_date: employeeData.hireDate || null, // <-- Lưu ngày vào
+      exit_date: employeeData.exitDate || null  // <-- Lưu ngày rời
     };
     const { data, error } = await supabaseClient.from('employees').insert([dbData]).select();
     if (error) throw error;
@@ -134,6 +138,8 @@ window.Store = {
     if (employeeData.status !== undefined) dbData.status = employeeData.status;
     if (employeeData.role !== undefined) dbData.role = employeeData.role;
     if (employeeData.password) dbData.password = employeeData.password;
+    if (employeeData.hireDate !== undefined) dbData.hire_date = employeeData.hireDate || null; // <-- Cập nhật ngày vào
+    if (employeeData.exitDate !== undefined) dbData.exit_date = employeeData.exitDate || null;  // <-- Cập nhật ngày rời
     
     const { error } = await supabaseClient.from('employees').update(dbData).eq('id', id);
     if (error) throw error;
@@ -264,12 +270,13 @@ window.Store = {
   async getMonthlyAttendanceSummary(employeeId, month) {
     const records = await this.getAttendanceRecords({ employeeId, month: month || Utils.getCurrentMonth() });
     return {
-      totalWorkDays: 22,
+      totalWorkDays: Utils.getWorkingDaysInMonth(month || Utils.getCurrentMonth()),
       presentDays: records.filter(r => r.status === 'on_time' || r.status === 'late').length,
       lateDays: records.filter(r => r.status === 'late').length,
       absentDays: records.filter(r => r.status === 'absent').length,
       leaveDays: records.filter(r => r.status === 'leave').length,
-      totalHours: 0
+      totalHours: 0,
+      hasRecords: records.length > 0 // <-- Đánh dấu có dữ liệu chấm công hay không
     };
   },
 
@@ -299,6 +306,9 @@ window.Store = {
         baseSalary: Number(d.base_salary),
         netSalary: Number(d.net_salary),
         personalTax: Number(d.personal_tax || 0),
+        allowances: Number(d.allowances || 0), // <-- Lấy phụ cấp từ DB
+        workDays: Number(d.work_days || 0),
+        actualWorkDays: Number(d.actual_work_days || 0),
         bhxhCompany: Number(d.bhxh_company || 0),
         bhytCompany: Number(d.bhyt_company || 0),
         bhtnCompany: Number(d.bhtn_company || 0),
@@ -316,19 +326,22 @@ window.Store = {
     const newRecords = [];
     for (const emp of employees) {
       const summary = await this.getMonthlyAttendanceSummary(emp.id, month);
-      const workDays = 22;
-      const actualDays = summary.presentDays || workDays;
+      const workDays = Utils.getWorkingDaysInMonth(month);
+      const actualDays = summary.hasRecords ? summary.presentDays : workDays;
       const prorated = emp.baseSalary * (actualDays / workDays);
-      const allowances = Math.round(emp.baseSalary * 0.1);
+      const allowances = 0; // <-- Đặt phụ cấp bằng 0 để không tính phụ cấp ẩn
       
-      const bhxhE = Utils.calculateBHXH(emp.baseSalary);
-      const bhytE = Utils.calculateBHYT(emp.baseSalary);
-      const bhtnE = Utils.calculateBHTN(emp.baseSalary);
+      // Theo Luật Lao động Việt Nam: Nếu làm dưới 14 ngày trong tháng thì không đóng BHXH/BHYT/BHTN
+      const paysInsurance = actualDays >= 14;
+      
+      const bhxhE = paysInsurance ? Utils.calculateBHXH(emp.baseSalary) : 0;
+      const bhytE = paysInsurance ? Utils.calculateBHYT(emp.baseSalary) : 0;
+      const bhtnE = paysInsurance ? Utils.calculateBHTN(emp.baseSalary) : 0;
       const totalInsuranceE = bhxhE + bhytE + bhtnE;
       
-      const bhxhC = Math.round(emp.baseSalary * 0.175);
-      const bhytC = Math.round(emp.baseSalary * 0.03);
-      const bhtnC = Math.round(emp.baseSalary * 0.01);
+      const bhxhC = paysInsurance ? Math.round(emp.baseSalary * 0.175) : 0;
+      const bhytC = paysInsurance ? Math.round(emp.baseSalary * 0.03) : 0;
+      const bhtnC = paysInsurance ? Math.round(emp.baseSalary * 0.01) : 0;
       
       const taxableIncome = prorated + allowances - totalInsuranceE;
       const tax = Utils.calculatePersonalTax(taxableIncome);
@@ -339,11 +352,18 @@ window.Store = {
         employee_id: emp.id, month: month,
         base_salary: emp.baseSalary, net_salary: net,
         personal_tax: tax,
+        allowances: allowances, // <-- Lưu phụ cấp vào DB
+        work_days: workDays,
+        actual_work_days: actualDays,
         bhxh_employee: bhxhE, bhyt_employee: bhytE, bhtn_employee: bhtnE,
         bhxh_company: bhxhC, bhyt_company: bhytC, bhtn_company: bhtnC
       };
       
-      const { data } = await supabaseClient.from('payroll').insert(record).select().single();
+      const { data, error } = await supabaseClient.from('payroll').insert(record).select().single();
+      if (error) {
+        console.error("Lỗi insert payroll:", error);
+        throw error;
+      }
       if(data) newRecords.push(data);
     }
     return this.getPayrollByMonth(month);

@@ -86,7 +86,7 @@ window.Pages.Employees = {
     if (!container) return;
     try {
       container.innerHTML = await this._renderContent();
-      
+
       this.currentPage = 1;
       this.itemsPerPage = 10;
       await this.loadData();
@@ -102,7 +102,7 @@ window.Pages.Employees = {
         this.currentPage = 1;
         this.renderTable();
       });
-    } catch(e) {
+    } catch (e) {
       container.innerHTML = `<div class="empty-state"><p style="color:var(--color-danger)">Lỗi tải dữ liệu: ${e.message}</p></div>`;
     }
   },
@@ -137,7 +137,7 @@ window.Pages.Employees = {
       tbody.innerHTML = paginated.map(emp => {
         const dept = this.departments.find(d => d.id === emp.departmentId);
         const status = statusMap[emp.status] || { label: emp.status, variant: 'secondary' };
-        
+
         return `
           <tr>
             <td>
@@ -190,7 +190,7 @@ window.Pages.Employees = {
     if (id) {
       emp = this.employees.find(e => e.id === id);
     }
-    
+
     const depts = await Store.getDepartments();
     const deptOptions = depts.map(d => `<option value="${d.id}" ${emp && emp.departmentId === d.id ? 'selected' : ''}>${d.name}</option>`).join('');
 
@@ -275,7 +275,7 @@ window.Pages.Employees = {
   async saveEmp(id) {
     const roleEl = document.getElementById('empRole');
     const pwdEl = document.getElementById('empPassword');
-    
+
     const data = {
       name: document.getElementById('empName').value,
       email: document.getElementById('empEmail').value,
@@ -287,7 +287,7 @@ window.Pages.Employees = {
       role: roleEl ? roleEl.value : 'employee',
       password: pwdEl ? pwdEl.value : undefined
     };
-    
+
     if (id && (!data.password || data.password === '')) {
       delete data.password;
     }
@@ -302,7 +302,7 @@ window.Pages.Employees = {
       }
       Components.closeModal('empModal');
       await this.loadData();
-    } catch(e) {
+    } catch (e) {
       Components.showToast('Lỗi lưu dữ liệu: ' + e.message, 'error');
     }
   },
@@ -311,14 +311,14 @@ window.Pages.Employees = {
     try {
       const list = this.employees || [];
       if (!list.length) { Components.showToast('Chưa có dữ liệu để xuất', 'warning'); return; }
-      const st = { active:'Đang làm', on_leave:'Nghỉ phép', resigned:'Đã nghỉ' };
+      const st = { active: 'Đang làm', on_leave: 'Nghỉ phép', resigned: 'Đã nghỉ' };
       const rows = list.map(e => {
         const dept = (this.departments || []).find(d => d.id === e.departmentId);
         return [e.name, e.email || '', e.phone || '', e.position || '', dept ? dept.name : '', e.baseSalary || 0, st[e.status] || e.status];
       });
-      Utils.exportExcel({ name:'Nhân sự', headers:['Họ tên','Email','SĐT','Chức vụ','Phòng ban','Lương cơ bản (đ)','Trạng thái'], rows }, 'bizcore-nhan-su.xlsx');
+      Utils.exportExcel({ name: 'Nhân sự', headers: ['Họ tên', 'Email', 'SĐT', 'Chức vụ', 'Phòng ban', 'Lương cơ bản (đ)', 'Trạng thái'], rows }, 'bizcore-nhan-su.xlsx');
       Components.showToast('Đã xuất ' + rows.length + ' nhân viên ra Excel', 'success');
-    } catch(e) { Components.showToast('Lỗi xuất Excel: ' + e.message, 'error'); }
+    } catch (e) { Components.showToast('Lỗi xuất Excel: ' + e.message, 'error'); }
   },
 
   async deleteEmp(id) {
@@ -327,11 +327,11 @@ window.Pages.Employees = {
         await Store.deleteEmployee(id);
         Components.showToast('Đã xóa nhân viên', 'success');
         await this.loadData();
-      } catch(e) {
+      } catch (e) {
         Components.showToast('Lỗi xóa dữ liệu: ' + e.message, 'error');
       }
     });
   },
 
-  unmount() {}
+  unmount() { }
 };

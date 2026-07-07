@@ -105,6 +105,24 @@ window.Utils = {
     return Math.round(tax);
   },
 
+  // Lấy số ngày làm việc tiêu chuẩn trong tháng (thứ 2 đến thứ 6)
+  getWorkingDaysInMonth(monthStr) {
+    if (!monthStr) return 22;
+    const [year, month] = monthStr.split('-').map(Number);
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    let count = 0;
+    let curr = new Date(startDate);
+    while (curr <= endDate) {
+      const day = curr.getDay();
+      if (day !== 0 && day !== 6) {
+        count++;
+      }
+      curr.setDate(curr.getDate() + 1);
+    }
+    return count;
+  },
+
   // Tạo ID ngẫu nhiên
   generateId() {
     return Math.random().toString(36).substring(2, 10) + Date.now().toString(36).slice(-4);

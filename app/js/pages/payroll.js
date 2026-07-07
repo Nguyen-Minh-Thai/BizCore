@@ -143,7 +143,7 @@ window.Pages.Payroll = {
             </div>
           </td>
           <td style="text-align:right;">${Utils.formatCurrency(r.baseSalary)}</td>
-          <td style="text-align:center;">${r.actualWorkDays || 22}/${r.workDays || 22}</td>
+          <td style="text-align:center;">${r.actualWorkDays != null ? r.actualWorkDays : 22}/${r.workDays != null ? r.workDays : 22}</td>
           <td style="text-align:right;color:var(--color-warning);">${Utils.formatCurrency(totalInsEmp)}</td>
           <td style="text-align:right;color:var(--color-danger);">${Utils.formatCurrency(r.personalTax || 0)}</td>
           <td style="text-align:right;font-weight:700;color:var(--color-success);">${Utils.formatCurrency(r.netSalary || r.baseSalary || 0)}</td>
@@ -200,7 +200,7 @@ window.Pages.Payroll = {
             </div>
             <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
               <span class="text-secondary">Ngày công:</span>
-              <span style="font-weight:500;">${record.actualWorkDays || 22}/${record.workDays || 22}</span>
+              <span style="font-weight:500;">${record.actualWorkDays != null ? record.actualWorkDays : 22}/${record.workDays != null ? record.workDays : 22}</span>
             </div>
             <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
               <span class="text-secondary">Phụ cấp:</span>
