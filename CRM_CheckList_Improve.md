@@ -733,3 +733,18 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 * **Lý do:**
   * **Biểu đồ Cột (Bar Chart)**: Tự động vẽ giá trị trực tiếp lên phía trên mỗi cột (sử dụng định dạng rút gọn `B` cho tỷ, `M` cho triệu hoặc `%` cho tỷ lệ OLE) để người dùng nắm bắt tức thì thông tin trực quan. Tăng giới hạn cắt ngắn nhãn trục x từ 10 lên 25 ký tự để tránh bị mất chữ.
   * **Biểu đồ Tròn (Doughnut Chart)**: Tự động tính toán góc vẽ và tọa độ để ghi trực tiếp phần trăm (`%`) vào bên trong từng phân khúc màu (slice) của biểu đồ tròn (chỉ hiển thị với các phần có tỷ lệ từ 5% trở lên để tránh chồng chéo chữ).
+
+---
+
+## 11. Phần bổ sung Giai đoạn 11 (Tối ưu hóa hiển thị nhãn trục X và Khắc phục định dạng %)
+
+### File: `app/js/charts.js` & `app/js/pages/dashboard.js` & `app/js/pages/reports.js`
+
+#### Mục 11.1: Khắc phục lỗi định dạng % nhầm lẫn và chống tràn chữ trục X
+* **Vị trí:** 
+  * `charts.js` (Hàm `bar` của đối tượng `Charts`)
+  * `dashboard.js` (`chartEmployeeDept` label config)
+  * `reports.js` (`chartDealRevenue` label config)
+* **Lý do:**
+  * **Sửa lỗi định dạng % nhầm lẫn**: Trước đó, các cột số lượng (như số nhân viên: `3`) có giá trị dưới 100 bị định dạng nhầm thành phần trăm (`3%`). Đã cấu hình thêm thuộc tính `isPercentage` kiểm tra nhãn dữ liệu để chỉ hiển thị ký tự `%` cho biểu đồ phần trăm thực tế (như OLE).
+  * **Chống đè chữ trục X**: Khôi phục nhãn ngắn gọn của trục X (tên phòng ban, tên trạng thái) để tránh tình trạng chữ quá dài chạy chồng chéo đè lên nhau, trong khi các số liệu chi tiết vẫn được hiển thị rõ ràng ngay phía trên đầu mỗi cột.

@@ -77,7 +77,8 @@ window.Charts = {
           ctx.font = 'bold 9.5px Inter,sans-serif';
           ctx.textAlign = 'center';
           let formattedVal = '';
-          if (val <= 100) {
+          const isPercentage = config.isPercentage || datasets[0].label?.includes('%') || datasets[0].label?.includes('Tỷ lệ') || datasets[0].label?.includes('OLE');
+          if (isPercentage) {
             formattedVal = val + '%';
           } else {
             if (val >= 1000000000) {

@@ -272,7 +272,7 @@ window.Pages.Reports = {
     const stageColors = { lead: '#94a3b8', qualified: '#38bdf8', proposal: '#fbbf24', negotiation: '#fb923c', won: '#22c55e', lost: '#ef4444' };
     
     Charts.bar('chartDealRevenue', {
-      labels: Object.keys(stages).map(k => `${stageLabelsMap[k]} (${Utils.formatCurrency(stages[k])})`),
+      labels: Object.keys(stages).map(k => stageLabelsMap[k]),
       datasets: [{
         label: 'Doanh thu dự kiến (VNĐ)',
         data: Object.values(stages),

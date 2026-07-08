@@ -192,11 +192,7 @@ window.Pages.Dashboard = {
           const employees = await Store.getEmployees();
           const totalEmps = employees.length || 1;
           Charts.bar('chartEmployeeDept', {
-            labels: departments.map(d => {
-              const count = employees.filter(e=>e.departmentId===d.id).length;
-              const pct = ((count / totalEmps) * 100).toFixed(1);
-              return `${d.name} (${count} NV - ${pct}%)`;
-            }),
+            labels: departments.map(d => d.name),
             datasets:[{ label:'Nhân viên', data: departments.map(d=>employees.filter(e=>e.departmentId===d.id).length),
               backgroundColor:['#0c6b57','#33417a','#a97c3f','#1a6a63','#3d4d90','#0e7a63','#c78a3c','#5a626c'] }]
           });
