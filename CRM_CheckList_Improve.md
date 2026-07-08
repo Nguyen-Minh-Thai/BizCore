@@ -701,3 +701,23 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
   * Nếu nội dung có chứa từ khóa liên quan đến tin nhắn ("sms", "tin nhắn", "nhắn tin"), chỉ số **SMS** sẽ tự động tăng lên 1.
   * Nếu nội dung có chứa từ khóa liên quan đến gọi điện ("gọi", "call", "cuộc gọi", "điện thoại"), chỉ số **Cuộc gọi** sẽ tự động tăng lên 1.
   * Điều này giúp số liệu báo cáo chuyển đổi phản ánh chính xác 100% nhật ký hành vi chăm sóc khách hàng của nhân viên.
+
+---
+
+## 9. Phần bổ sung Giai đoạn 9 (Hiển thị số liệu trực tiếp trên các Biểu đồ)
+
+### File: `app/js/pages/reports.js` & `app/js/pages/dashboard.js`
+
+#### Mục 9.1: Tích hợp nhãn số liệu và phần trăm trực tiếp vào biểu đồ
+* **Vị trí:** 
+  * `reports.js` (Hàm `initRevenueCharts` & `initHRCharts`)
+  * `dashboard.js` (Hàm `mount` cho biểu đồ `chartEmployeeDept` & `chartDealStatus`)
+* **Lý do:** 
+  * Giúp người quản trị dễ dàng quan sát số lượng và phần trăm ngay tại danh sách chú thích (Legend/Labels) của biểu đồ mà không cần phải rê chuột (hover) vào từng vùng cột hay hình tròn.
+  * **Biểu đồ đã nâng cấp**:
+    1. Doanh thu dự kiến theo trạng thái (Deals) - hiển thị số tiền VNĐ.
+    2. Tỷ lệ nhân sự theo phòng ban - hiển thị số nhân viên (NV) và tỷ lệ %.
+    3. Hiệu quả lao động OLE - hiển thị tỷ lệ hiệu quả %.
+    4. Nhân viên theo phòng ban - hiển thị số nhân viên và %.
+    5. Cơ hội theo giai đoạn - hiển thị số cơ hội và %.
+    6. Khách hàng theo nguồn - hiển thị số khách hàng (KH) và %.

@@ -272,7 +272,7 @@ window.Pages.Reports = {
     const stageColors = { lead: '#94a3b8', qualified: '#38bdf8', proposal: '#fbbf24', negotiation: '#fb923c', won: '#22c55e', lost: '#ef4444' };
     
     Charts.bar('chartDealRevenue', {
-      labels: Object.keys(stages).map(k => stageLabelsMap[k]),
+      labels: Object.keys(stages).map(k => `${stageLabelsMap[k]} (${Utils.formatCurrency(stages[k])})`),
       datasets: [{
         label: 'Doanh thu dự kiến (VNĐ)',
         data: Object.values(stages),
@@ -286,9 +286,10 @@ window.Pages.Reports = {
       const src = c.source || 'Khác';
       sources[src] = (sources[src] || 0) + 1;
     });
+    const totalCustomers = customers.length || 1;
 
     Charts.doughnut('chartCustomerSource', {
-      labels: Object.keys(sources),
+      labels: Object.keys(sources).map(k => `${k} (${sources[k]} KH - ${((sources[k] / totalCustomers) * 100).toFixed(1)}%)`),
       datasets: [{
         data: Object.values(sources),
         backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#64748b']
@@ -345,7 +346,7 @@ window.Pages.Reports = {
     // 3. OLE (Overall Labor Effectiveness) by department
     // HR: 82%, Sales: 78%, Marketing: 75%, IT: 72%, Customer Service: 71%
     Charts.bar('chartOLEPerformance', {
-      labels: ['Hành chính - Nhân sự', 'Kinh doanh (Sales)', 'Marketing', 'Công nghệ thông tin', 'Chăm sóc khách hàng'],
+      labels: ['Hành chính - Nhân sự (82%)', 'Kinh doanh (Sales) (78%)', 'Marketing (75%)', 'Công nghệ thông tin (72%)', 'Chăm sóc khách hàng (71%)'],
       datasets: [{
         label: 'Tỷ lệ OLE (%)',
         data: [82, 78, 75, 72, 71],

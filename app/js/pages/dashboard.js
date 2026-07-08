@@ -204,7 +204,16 @@ window.Pages.Dashboard = {
           const labelMap={lead:'Lead',qualified:'Tiềm năng',proposal:'Báo giá',negotiation:'Đàm phán',won:'Thành công',lost:'Thất bại'};
           const colorMap={lead:'#8d8377',qualified:'#33417a',proposal:'#a97c3f',negotiation:'#c78a3c',won:'#0c6b57',lost:'#bb362b'};
           const L=[],D=[],C=[];
-          if(byStage) for(const [st,arr] of Object.entries(byStage)){ L.push(labelMap[st]||st); D.push(Array.isArray(arr)?arr.length:arr); C.push(colorMap[st]||'#8d8377'); }
+          const totalDeals = (deals || []).length || 1;
+          if(byStage) {
+            for(const [st,arr] of Object.entries(byStage)){
+              const count = Array.isArray(arr) ? arr.length : arr;
+              const pct = ((count / totalDeals) * 100).toFixed(1);
+              L.push(`${labelMap[st]||st} (${count} cơ hội - ${pct}%)`);
+              D.push(count);
+              C.push(colorMap[st]||'#8d8377');
+            }
+          }
           Charts.doughnut('chartDealStatus', { labels:L, datasets:[{ data:D, backgroundColor:C }] });
         } catch(e){ console.warn('chart', e); }
       }, 80);
