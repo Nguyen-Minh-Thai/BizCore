@@ -346,7 +346,7 @@ window.Pages.Reports = {
     // 3. OLE (Overall Labor Effectiveness) by department
     // HR: 82%, Sales: 78%, Marketing: 75%, IT: 72%, Customer Service: 71%
     Charts.bar('chartOLEPerformance', {
-      labels: ['Hành chính - Nhân sự (82%)', 'Kinh doanh (Sales) (78%)', 'Marketing (75%)', 'Công nghệ thông tin (72%)', 'Chăm sóc khách hàng (71%)'],
+      labels: ['Hành chính - Nhân sự', 'Kinh doanh (Sales)', 'Marketing', 'Công nghệ thông tin', 'Chăm sóc khách hàng'],
       datasets: [{
         label: 'Tỷ lệ OLE (%)',
         data: [82, 78, 75, 72, 71],

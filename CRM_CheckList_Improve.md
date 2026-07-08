@@ -748,3 +748,17 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 * **Lý do:**
   * **Sửa lỗi định dạng % nhầm lẫn**: Trước đó, các cột số lượng (như số nhân viên: `3`) có giá trị dưới 100 bị định dạng nhầm thành phần trăm (`3%`). Đã cấu hình thêm thuộc tính `isPercentage` kiểm tra nhãn dữ liệu để chỉ hiển thị ký tự `%` cho biểu đồ phần trăm thực tế (như OLE).
   * **Chống đè chữ trục X**: Khôi phục nhãn ngắn gọn của trục X (tên phòng ban, tên trạng thái) để tránh tình trạng chữ quá dài chạy chồng chéo đè lên nhau, trong khi các số liệu chi tiết vẫn được hiển thị rõ ràng ngay phía trên đầu mỗi cột.
+
+---
+
+## 12. Phần bổ sung Giai đoạn 12 (Tối ưu hóa màu sắc nhãn Bar và Loại bỏ số liệu thừa ở trục hoành)
+
+### File: `app/js/charts.js` & `app/js/pages/reports.js`
+
+#### Mục 12.1: Đồng bộ màu sắc nhãn và làm sạch chú thích trục hoành
+* **Vị trí:**
+  * `charts.js` (Hàm `bar` của đối tượng `Charts`)
+  * `reports.js` (`chartOLEPerformance` label config)
+* **Lý do:**
+  * **Đồng bộ màu nhãn cột**: Cải thiện độ tương phản bằng cách sử dụng chính màu sắc của cột để vẽ chữ số liệu trên đầu cột (tăng kích thước font lên `bold 11px Inter`), giúp dễ nhìn thấy rõ ràng trên nền sáng.
+  * **Làm sạch trục hoành**: Loại bỏ các con số phần trăm cứng nhắc khỏi danh sách nhãn trục hoành của biểu đồ OLE trong `reports.js`, trả lại giao diện gọn gàng, trực quan.

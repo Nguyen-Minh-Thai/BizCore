@@ -73,8 +73,8 @@ window.Charts = {
 
         // Draw the value above the bar
         if (progress >= 1) {
-          ctx.fillStyle = '#f1f5f9';
-          ctx.font = 'bold 9.5px Inter,sans-serif';
+          ctx.fillStyle = datasets.length > 1 ? (this.COLORS[i % this.COLORS.length]) : color;
+          ctx.font = 'bold 11px Inter,sans-serif';
           ctx.textAlign = 'center';
           let formattedVal = '';
           const isPercentage = config.isPercentage || datasets[0].label?.includes('%') || datasets[0].label?.includes('Tỷ lệ') || datasets[0].label?.includes('OLE');
