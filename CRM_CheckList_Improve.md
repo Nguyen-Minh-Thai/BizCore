@@ -721,3 +721,15 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
     4. Nhân viên theo phòng ban - hiển thị số nhân viên và %.
     5. Cơ hội theo giai đoạn - hiển thị số cơ hội và %.
     6. Khách hàng theo nguồn - hiển thị số khách hàng (KH) và %.
+
+---
+
+## 10. Phần bổ sung Giai đoạn 10 (Nâng cấp Vẽ Canvas Chart - Nhãn Số liệu và Phần trăm)
+
+### File: `app/js/charts.js`
+
+#### Mục 10.1: Vẽ giá trị trên cột Bar Chart và Tỷ lệ phần trăm trong Doughnut Slices
+* **Vị trí:** Hàm `bar` và hàm `doughnut` của đối tượng `Charts`
+* **Lý do:**
+  * **Biểu đồ Cột (Bar Chart)**: Tự động vẽ giá trị trực tiếp lên phía trên mỗi cột (sử dụng định dạng rút gọn `B` cho tỷ, `M` cho triệu hoặc `%` cho tỷ lệ OLE) để người dùng nắm bắt tức thì thông tin trực quan. Tăng giới hạn cắt ngắn nhãn trục x từ 10 lên 25 ký tự để tránh bị mất chữ.
+  * **Biểu đồ Tròn (Doughnut Chart)**: Tự động tính toán góc vẽ và tọa độ để ghi trực tiếp phần trăm (`%`) vào bên trong từng phân khúc màu (slice) của biểu đồ tròn (chỉ hiển thị với các phần có tỷ lệ từ 5% trở lên để tránh chồng chéo chữ).

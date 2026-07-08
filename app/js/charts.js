@@ -24,7 +24,7 @@ window.Charts = {
     const data = datasets[0].data;
     const color = datasets[0].color || this.COLORS[0];
     const max = Math.max(...data, 1) * 1.15;
-    const padL = 55, padR = 20, padT = 20, padB = 50;
+    const padL = 55, padR = 20, padT = 30, padB = 50; // Increased padT to prevent value labels clipping
     const chartW = w - padL - padR, chartH = h - padT - padB;
     const barW = Math.min(40, chartW / data.length * 0.6);
     const gap = chartW / data.length;
@@ -44,7 +44,7 @@ window.Charts = {
     const animate = () => {
       progress = Math.min(1, progress + 0.04);
       // Clear bar area
-      ctx.clearRect(padL, padT, chartW + padR, chartH + 2);
+      ctx.clearRect(padL, padT - 15, chartW + padR, chartH + 17);
       // Redraw grid
       ctx.strokeStyle = 'rgba(148,163,184,0.1)'; ctx.lineWidth = 1;
       for (let i = 0; i <= 4; i++) {
@@ -70,6 +70,26 @@ window.Charts = {
         ctx.quadraticCurveTo(x + barW, y, x + barW, y + r);
         ctx.lineTo(x + barW, padT + chartH);
         ctx.fill();
+
+        // Draw the value above the bar
+        if (progress >= 1) {
+          ctx.fillStyle = '#f1f5f9';
+          ctx.font = 'bold 9.5px Inter,sans-serif';
+          ctx.textAlign = 'center';
+          let formattedVal = '';
+          if (val <= 100) {
+            formattedVal = val + '%';
+          } else {
+            if (val >= 1000000000) {
+              formattedVal = (val / 1000000000).toFixed(2) + 'B';
+            } else if (val >= 1000000) {
+              formattedVal = (val / 1000000).toFixed(1) + 'M';
+            } else {
+              formattedVal = val.toLocaleString();
+            }
+          }
+          ctx.fillText(formattedVal, x + barW / 2, y - 6);
+        }
       });
 
       if (progress < 1) requestAnimationFrame(animate);
@@ -79,7 +99,7 @@ window.Charts = {
     labels.forEach((label, i) => {
       const x = padL + gap * i + gap / 2;
       ctx.fillStyle = '#94a3b8'; ctx.font = '11px Inter,sans-serif'; ctx.textAlign = 'center';
-      const shortLabel = label.length > 10 ? label.substring(0, 10) + '…' : label;
+      const shortLabel = label.length > 25 ? label.substring(0, 22) + '…' : label;
       ctx.fillText(shortLabel, x, h - padB + 18);
     });
 
@@ -219,6 +239,27 @@ window.Charts = {
       ctx.fillText(total.toLocaleString(), cx, cy + 2);
       ctx.fillStyle = '#94a3b8'; ctx.font = '11px Inter,sans-serif';
       ctx.fillText('Tổng', cx, cy + 18);
+
+      // Draw slice percentages inside doughnut slices
+      if (progress >= 1) {
+        let startAngle = -Math.PI / 2;
+        data.forEach((val, i) => {
+          const slice = (val / total) * Math.PI * 2;
+          const pct = Math.round((val / total) * 100);
+          if (pct >= 5) {
+            const angle = startAngle + slice / 2;
+            const dist = (radius + innerRadius) / 2;
+            const lx = cx + Math.cos(angle) * dist;
+            const ly = cy + Math.sin(angle) * dist;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 10px Inter,sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(pct + '%', lx, ly);
+          }
+          startAngle += slice;
+        });
+      }
 
       if (progress < 1) requestAnimationFrame(animate);
     };
