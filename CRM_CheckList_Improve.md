@@ -772,3 +772,13 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 #### Mục 13.1: Xóa hậu tố (Won) và (Lost) để chống đè chữ trục X
 * **Vị trí:** `reports.js` (`chartDealRevenue` stageLabelsMap config)
 * **Lý do:** Rút ngắn hai nhãn trạng thái từ `Thành công (Won)` thành `Thành công` và từ `Thất bại (Lost)` thành `Thất bại`, triệt tiêu hoàn toàn hiện tượng tràn văn bản chồng lấn nhau ở hai cột cuối của biểu đồ doanh thu.
+
+---
+
+## 14. Phần bổ sung Giai đoạn 14 (Vẽ Tên thành phần trực tiếp lên Doughnut Chart Slices)
+
+### File: `app/js/charts.js`
+
+#### Mục 14.1: Vẽ Tên thành phần và phần trăm trực tiếp trong lát cắt Doughnut
+* **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`)
+* **Lý do:** Cho phép hiển thị trực tiếp cả Tên thành phần (ví dụ: `Marketing`, `Nhân sự`, `Lead`, `Tiềm năng`...) và tỷ lệ phần trăm (`%`) của chúng ngay trên các lát cắt của biểu đồ tròn (chỉ áp dụng đối với lát cắt có tỷ lệ từ 12% trở lên để đảm bảo tính mỹ thuật và khoảng trống hiển thị).

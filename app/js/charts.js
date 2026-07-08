@@ -241,7 +241,7 @@ window.Charts = {
       ctx.fillStyle = '#94a3b8'; ctx.font = '11px Inter,sans-serif';
       ctx.fillText('Tổng', cx, cy + 18);
 
-      // Draw slice percentages inside doughnut slices
+      // Draw slice percentages and component names inside doughnut slices
       if (progress >= 1) {
         let startAngle = -Math.PI / 2;
         data.forEach((val, i) => {
@@ -253,10 +253,24 @@ window.Charts = {
             const lx = cx + Math.cos(angle) * dist;
             const ly = cy + Math.sin(angle) * dist;
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 10px Inter,sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText(pct + '%', lx, ly);
+            
+            // Lấy tên thành phần sạch từ nhãn
+            const fullLabel = labels[i] || '';
+            const cleanName = fullLabel.split(' (')[0];
+            
+            if (pct >= 12) {
+              // Vẽ cả Tên và % nếu lát cắt đủ rộng
+              ctx.font = 'bold 8.5px Inter,sans-serif';
+              ctx.fillText(cleanName, lx, ly - 5);
+              ctx.font = 'bold 9px Inter,sans-serif';
+              ctx.fillText(pct + '%', lx, ly + 5);
+            } else {
+              // Vẽ % nếu lát cắt hẹp hơn
+              ctx.font = 'bold 9.5px Inter,sans-serif';
+              ctx.fillText(pct + '%', lx, ly);
+            }
           }
           startAngle += slice;
         });
