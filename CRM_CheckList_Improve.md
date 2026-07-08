@@ -762,3 +762,13 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 * **Lý do:**
   * **Đồng bộ màu nhãn cột**: Cải thiện độ tương phản bằng cách sử dụng chính màu sắc của cột để vẽ chữ số liệu trên đầu cột (tăng kích thước font lên `bold 11px Inter`), giúp dễ nhìn thấy rõ ràng trên nền sáng.
   * **Làm sạch trục hoành**: Loại bỏ các con số phần trăm cứng nhắc khỏi danh sách nhãn trục hoành của biểu đồ OLE trong `reports.js`, trả lại giao diện gọn gàng, trực quan.
+
+---
+
+## 13. Phần bổ sung Giai đoạn 13 (Tối ưu hóa nhãn trục hoành Doanh thu Deal)
+
+### File: `app/js/pages/reports.js`
+
+#### Mục 13.1: Xóa hậu tố (Won) và (Lost) để chống đè chữ trục X
+* **Vị trí:** `reports.js` (`chartDealRevenue` stageLabelsMap config)
+* **Lý do:** Rút ngắn hai nhãn trạng thái từ `Thành công (Won)` thành `Thành công` và từ `Thất bại (Lost)` thành `Thất bại`, triệt tiêu hoàn toàn hiện tượng tràn văn bản chồng lấn nhau ở hai cột cuối của biểu đồ doanh thu.

@@ -268,7 +268,7 @@ window.Pages.Reports = {
     const stages = { 'lead': 0, 'qualified': 0, 'proposal': 0, 'negotiation': 0, 'won': 0, 'lost': 0 };
     deals.forEach(d => { if (stages[d.stage] !== undefined) stages[d.stage] += (d.value || 0); });
     
-    const stageLabelsMap = { lead: 'Lead / Mới', qualified: 'Tiềm năng', proposal: 'Báo giá', negotiation: 'Đàm phán', won: 'Thành công (Won)', lost: 'Thất bại (Lost)' };
+    const stageLabelsMap = { lead: 'Lead / Mới', qualified: 'Tiềm năng', proposal: 'Báo giá', negotiation: 'Đàm phán', won: 'Thành công', lost: 'Thất bại' };
     const stageColors = { lead: '#94a3b8', qualified: '#38bdf8', proposal: '#fbbf24', negotiation: '#fb923c', won: '#22c55e', lost: '#ef4444' };
     
     Charts.bar('chartDealRevenue', {
