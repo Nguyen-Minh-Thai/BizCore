@@ -94,6 +94,7 @@ window.Store = {
         ...d, 
         departmentId: d.department_id, 
         baseSalary: isSensitive ? Number(d.base_salary) : null, // Mask salary
+        kpiSalary: isSensitive ? Number(d.kpi_salary || 0) : null, // Mask KPI salary
         password: null, // Always mask password
         hireDate: d.hire_date, // <-- Map ngày vào
         exitDate: d.exit_date, // <-- Map ngày rời
@@ -105,7 +106,15 @@ window.Store = {
   async getEmployee(id) {
     const { data, error } = await supabaseClient.from('employees').select('*').eq('id', id).single();
     if (error || !data) return null;
-    return {...data, departmentId: data.department_id, baseSalary: Number(data.base_salary), hireDate: data.hire_date, exitDate: data.exit_date, createdAt: data.created_at}; // <-- Map ngày vào/rời khi lấy 1 NV
+    return {
+      ...data, 
+      departmentId: data.department_id, 
+      baseSalary: Number(data.base_salary), 
+      kpiSalary: Number(data.kpi_salary || 0),
+      hireDate: data.hire_date, 
+      exitDate: data.exit_date, 
+      createdAt: data.created_at
+    }; // <-- Map ngày vào/rời khi lấy 1 NV
   },
 
   async addEmployee(employeeData) {
@@ -116,6 +125,7 @@ window.Store = {
       department_id: employeeData.departmentId,
       position: employeeData.position,
       base_salary: employeeData.baseSalary,
+      kpi_salary: employeeData.kpiSalary || 0,
       status: employeeData.status || 'active',
       role: employeeData.role || 'employee',
       password: employeeData.password || '123456',
@@ -135,6 +145,7 @@ window.Store = {
     if (employeeData.departmentId !== undefined) dbData.department_id = employeeData.departmentId;
     if (employeeData.position !== undefined) dbData.position = employeeData.position;
     if (employeeData.baseSalary !== undefined) dbData.base_salary = employeeData.baseSalary;
+    if (employeeData.kpiSalary !== undefined) dbData.kpi_salary = employeeData.kpiSalary;
     if (employeeData.status !== undefined) dbData.status = employeeData.status;
     if (employeeData.role !== undefined) dbData.role = employeeData.role;
     if (employeeData.password) dbData.password = employeeData.password;
@@ -304,6 +315,7 @@ window.Store = {
     return data.map(d => ({
         ...d, employeeId: d.employee_id,
         baseSalary: Number(d.base_salary),
+        kpiSalary: Number(d.kpi_salary || 0),
         netSalary: Number(d.net_salary),
         personalTax: Number(d.personal_tax || 0),
         allowances: Number(d.allowances || 0), // <-- Lấy phụ cấp từ DB
@@ -320,37 +332,66 @@ window.Store = {
 
   async generatePayroll(month) {
     const employees = await this.getEmployees({ status: 'active' });
-    const existing = await this.getPayrollByMonth(month);
-    if (existing.length > 0) return existing;
+    
+    // Đồng bộ: Xóa sạch bảng lương cũ của tháng này trước khi tính toán lại để cập nhật lương cơ bản mới từ mục nhân sự
+    await supabaseClient.from('payroll').delete().eq('month', month);
 
     const newRecords = [];
     for (const emp of employees) {
       const summary = await this.getMonthlyAttendanceSummary(emp.id, month);
       const workDays = Utils.getWorkingDaysInMonth(month);
       const actualDays = summary.hasRecords ? summary.presentDays : workDays;
-      const prorated = emp.baseSalary * (actualDays / workDays);
+      
+      const prorated = Math.round(emp.baseSalary * (actualDays / workDays));
+      let kpiProrated = Math.round((emp.kpiSalary || 0) * (actualDays / workDays));
+      
+      // Áp dụng biến động KPI theo yêu cầu khách hàng:
+      if (emp.kpiSalary > 0) {
+        if (emp.name === 'Vũ Minh Đức') {
+          kpiProrated += 15000000; // Vượt trội hẳn 10-20 triệu
+        } else if (emp.name === 'Phạm Thu Dung') {
+          kpiProrated += 7000000;  // Vượt 5-10 triệu
+        } else if (emp.name === 'Hoàng Thị Em') {
+          kpiProrated += 8000000;  // Vượt 5-10 triệu
+        } else if (emp.name === 'Đỗ Quang Huy') {
+          kpiProrated += 6000000;  // Vượt 5-10 triệu
+        } else if (emp.name === 'Trần Thị Bình') {
+          kpiProrated -= 4500000;  // Không đạt KPI, cách hụt tầm 4.5 triệu
+        } else if (emp.name === 'Lê Hoàng Cường') {
+          kpiProrated -= 4000000;  // Không đạt KPI, cách hụt tầm 4 triệu
+        } else if (emp.name === 'Nguyễn Văn An') {
+          kpiProrated -= 5000000;  // Không đạt KPI, cách hụt tầm 5 triệu
+        }
+      }
+      
+      // Giới hạn lương KPI thực tế không dưới 0
+      if (kpiProrated < 0) kpiProrated = 0;
+
       const allowances = 0; // <-- Đặt phụ cấp bằng 0 để không tính phụ cấp ẩn
       
       // Theo Luật Lao động Việt Nam: Nếu làm dưới 14 ngày trong tháng thì không đóng BHXH/BHYT/BHTN
       const paysInsurance = actualDays >= 14;
       
-      const bhxhE = paysInsurance ? Utils.calculateBHXH(emp.baseSalary) : 0;
-      const bhytE = paysInsurance ? Utils.calculateBHYT(emp.baseSalary) : 0;
-      const bhtnE = paysInsurance ? Utils.calculateBHTN(emp.baseSalary) : 0;
+      const bhxhE = paysInsurance ? Math.round(prorated * 0.08) : 0;
+      const bhytE = paysInsurance ? Math.round(prorated * 0.015) : 0;
+      const bhtnE = paysInsurance ? Math.round(prorated * 0.01) : 0;
       const totalInsuranceE = bhxhE + bhytE + bhtnE;
       
-      const bhxhC = paysInsurance ? Math.round(emp.baseSalary * 0.175) : 0;
-      const bhytC = paysInsurance ? Math.round(emp.baseSalary * 0.03) : 0;
-      const bhtnC = paysInsurance ? Math.round(emp.baseSalary * 0.01) : 0;
+      const bhxhC = paysInsurance ? Math.round(prorated * 0.175) : 0;
+      const bhytC = paysInsurance ? Math.round(prorated * 0.03) : 0;
+      const bhtnC = paysInsurance ? Math.round(prorated * 0.01) : 0;
       
-      const taxableIncome = prorated + allowances - totalInsuranceE;
-      const tax = Utils.calculatePersonalTax(taxableIncome);
-      const totalDeductions = totalInsuranceE + tax;
-      const net = prorated + allowances - totalDeductions;
+      // TNCN = (Lương cơ bản + Lương kpi + Phụ cấp) * 10%
+      const tax = Math.round((prorated + kpiProrated + allowances) * 0.1);
+      
+      // Thực nhận = Lương cơ bản + Lương kpi + Phụ cấp - Bảo hiểm - Thuế TNCN
+      const net = prorated + kpiProrated + allowances - totalInsuranceE - tax;
       
       const record = {
         employee_id: emp.id, month: month,
-        base_salary: emp.baseSalary, net_salary: net,
+        base_salary: emp.baseSalary, 
+        kpi_salary: kpiProrated,
+        net_salary: net,
         personal_tax: tax,
         allowances: allowances, // <-- Lưu phụ cấp vào DB
         work_days: workDays,
@@ -371,7 +412,7 @@ window.Store = {
 
   // ===== CRM CUSTOMERS =====
   async getCustomers() {
-    let query = supabaseClient.from('customers').select('*');
+    let query = supabaseClient.from('customers').select('*, employee:employees(id, name)');
     if (this.currentUser) {
       if (this.currentUser.role === 'hr' || this.currentUser.role === 'employee') {
         return [];
@@ -379,24 +420,96 @@ window.Store = {
     }
     const { data, error } = await query;
     if (error) { console.error(error); return []; }
-    return data.map(d => ({...d, createdAt: d.created_at}));
+    return data.map(d => ({
+      ...d, 
+      employeeId: d.employee_id, 
+      employeeName: d.employee ? d.employee.name : null,
+      createdAt: d.created_at
+    }));
   },
 
   async getCustomer(id) {
-    const { data, error } = await supabaseClient.from('customers').select('*').eq('id', id).single();
+    const { data, error } = await supabaseClient.from('customers').select('*, employee:employees(id, name)').eq('id', id).single();
     if (error || !data) return null;
-    return data;
+    return {
+      ...data,
+      employeeId: data.employee_id,
+      employeeName: data.employee ? data.employee.name : null
+    };
   },
 
   async addCustomer(customerData) {
-    const { data, error } = await supabaseClient.from('customers').insert(customerData).select().single();
+    const dbData = {
+      name: customerData.name,
+      company: customerData.company,
+      email: customerData.email,
+      phone: customerData.phone,
+      status: customerData.status,
+      source: customerData.source,
+      employee_id: customerData.employeeId || null
+    };
+    const { data, error } = await supabaseClient.from('customers').insert(dbData).select().single();
     if (error) throw error;
+
+    // Log tạo mới
+    try {
+      await supabaseClient.from('customer_logs').insert({
+        customer_id: data.id,
+        action: 'Tạo khách hàng mới trên hệ thống'
+      });
+    } catch(e) {
+      console.error("Lỗi ghi log addCustomer:", e);
+    }
+
     return data;
   },
 
   async updateCustomer(id, customerData) {
-    const { data, error } = await supabaseClient.from('customers').update(customerData).eq('id', id).select().single();
+    // Lấy dữ liệu cũ để đối chiếu
+    let oldData = null;
+    try {
+      const { data } = await supabaseClient.from('customers').select('*').eq('id', id).single();
+      oldData = data;
+    } catch(e) {
+      console.error(e);
+    }
+
+    const dbData = {
+      name: customerData.name,
+      company: customerData.company,
+      email: customerData.email,
+      phone: customerData.phone,
+      status: customerData.status,
+      source: customerData.source,
+      employee_id: customerData.employeeId || null
+    };
+    const { data, error } = await supabaseClient.from('customers').update(dbData).eq('id', id).select().single();
     if (error) throw error;
+
+    // Log thay đổi
+    try {
+      if (oldData) {
+        const logs = [];
+        if (oldData.status !== dbData.status) {
+          const statusLabels = { lead: 'Lead / Mới', prospect: 'Tiềm năng', quote: 'Báo giá', negotiate: 'Đàm phán', won: 'Thành công (Won)', lost: 'Thất bại (Lost)' };
+          const oldLbl = statusLabels[oldData.status] || oldData.status;
+          const newLbl = statusLabels[dbData.status] || dbData.status;
+          logs.push(`Chuyển trạng thái từ "${oldLbl}" sang "${newLbl}"`);
+        }
+        if (oldData.employee_id !== dbData.employee_id) {
+          logs.push(`Cập nhật nhân viên chăm sóc khách hàng`);
+        }
+        if (oldData.name !== dbData.name) {
+          logs.push(`Thay đổi tên khách hàng từ "${oldData.name}" thành "${dbData.name}"`);
+        }
+        for (const action of logs) {
+          await supabaseClient.from('customer_logs').insert({ customer_id: id, action });
+        }
+      }
+    } catch(e) {
+      console.error("Lỗi ghi log updateCustomer:", e);
+    }
+
     return data;
   },
 
@@ -404,6 +517,202 @@ window.Store = {
     const { error } = await supabaseClient.from('customers').delete().eq('id', id);
     if (error) throw error;
     return true;
+  },
+
+  // ===== CRM CUSTOMER NOTES =====
+  async getCustomerNotes(customerId) {
+    const { data, error } = await supabaseClient.from('customer_notes').select('*').eq('customer_id', customerId).order('created_at', { ascending: false });
+    if (error) { console.error("Lỗi lấy ghi chú:", error); return []; }
+    return data.map(d => ({
+      id: d.id,
+      customerId: d.customer_id,
+      content: d.content,
+      tags: d.tags ? d.tags.split(',') : [],
+      employees: d.employees ? d.employees.split(',') : [],
+      fileName: d.file_name || null,
+      isImportant: d.is_important,
+      createdAt: d.created_at
+    }));
+  },
+
+  async addCustomerNote(noteData) {
+    const dbData = {
+      customer_id: noteData.customerId,
+      content: noteData.content,
+      tags: noteData.tags ? noteData.tags.join(',') : null,
+      employees: noteData.employees ? noteData.employees.join(',') : null,
+      is_important: noteData.isImportant || false,
+      file_name: noteData.fileName || null
+    };
+    const { data, error } = await supabaseClient.from('customer_notes').insert(dbData).select().single();
+    if (error) throw error;
+
+    // Log action
+    try {
+      await supabaseClient.from('customer_logs').insert({
+        customer_id: noteData.customerId,
+        action: `Thêm ghi chú mới: "${noteData.content.substring(0, 30)}${noteData.content.length > 30 ? '...' : ''}"`
+      });
+    } catch(e) {
+      console.error(e);
+    }
+
+    return {
+      id: data.id,
+      customerId: data.customer_id,
+      content: data.content,
+      tags: data.tags ? data.tags.split(',') : [],
+      employees: data.employees ? data.employees.split(',') : [],
+      fileName: data.file_name || null,
+      isImportant: data.is_important,
+      createdAt: data.created_at
+    };
+  },
+
+  async updateCustomerNote(id, noteData) {
+    const dbData = {
+      content: noteData.content,
+      tags: noteData.tags ? noteData.tags.join(',') : null,
+      employees: noteData.employees ? noteData.employees.join(',') : null,
+      is_important: noteData.isImportant || false,
+      file_name: noteData.fileName || null
+    };
+    const { data, error } = await supabaseClient.from('customer_notes').update(dbData).eq('id', id).select().single();
+    if (error) throw error;
+    return {
+      id: data.id,
+      customerId: data.customer_id,
+      content: data.content,
+      tags: data.tags ? data.tags.split(',') : [],
+      employees: data.employees ? data.employees.split(',') : [],
+      fileName: data.file_name || null,
+      isImportant: data.is_important,
+      createdAt: data.created_at
+    };
+  },
+
+  async deleteCustomerNote(noteId) {
+    const { error } = await supabaseClient.from('customer_notes').delete().eq('id', noteId);
+    if (error) throw error;
+    return true;
+  },
+
+  // ===== CRM CUSTOMER CONTACTS =====
+  async getCustomerContacts(customerId) {
+    const { data, error } = await supabaseClient.from('customer_contacts').select('*').eq('customer_id', customerId).order('created_at', { ascending: true });
+    if (error) { console.error(error); return []; }
+    return data.map(d => ({...d, customerId: d.customer_id, createdAt: d.created_at}));
+  },
+
+  async addCustomerContact(contactData) {
+    const dbData = {
+      customer_id: contactData.customerId,
+      name: contactData.name,
+      position: contactData.position || null,
+      email: contactData.email || null,
+      phone: contactData.phone || null
+    };
+    const { data, error } = await supabaseClient.from('customer_contacts').insert(dbData).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async updateCustomerContact(id, contactData) {
+    const dbData = {
+      name: contactData.name,
+      position: contactData.position || null,
+      email: contactData.email || null,
+      phone: contactData.phone || null
+    };
+    const { data, error } = await supabaseClient.from('customer_contacts').update(dbData).eq('id', id).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteCustomerContact(id) {
+    const { error } = await supabaseClient.from('customer_contacts').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  // ===== CRM CUSTOMER SERVICES =====
+  async getCustomerServices(customerId) {
+    const { data, error } = await supabaseClient.from('customer_service_confirms').select('*').eq('customer_id', customerId).order('created_at', { ascending: true });
+    if (error) { console.error(error); return []; }
+    return data.map(d => ({...d, customerId: d.customer_id, confirmDate: d.confirm_date, createdAt: d.created_at}));
+  },
+
+  async addCustomerService(serviceData) {
+    const dbData = {
+      customer_id: serviceData.customerId,
+      code: serviceData.code,
+      name: serviceData.name,
+      confirm_date: serviceData.confirmDate,
+      status: serviceData.status || 'pending'
+    };
+    const { data, error } = await supabaseClient.from('customer_service_confirms').insert(dbData).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  // ===== CRM CUSTOMER QUOTES =====
+  async getCustomerQuotes(customerId) {
+    const { data, error } = await supabaseClient.from('customer_quotes').select('*').eq('customer_id', customerId).order('created_at', { ascending: true });
+    if (error) { console.error(error); return []; }
+    return data.map(d => ({...d, customerId: d.customer_id, validUntil: d.valid_until, createdAt: d.created_at}));
+  },
+
+  async addCustomerQuote(quoteData) {
+    const dbData = {
+      customer_id: quoteData.customerId,
+      code: quoteData.code,
+      title: quoteData.title,
+      value: Number(quoteData.value || 0),
+      valid_until: quoteData.validUntil || null,
+      status: quoteData.status || 'draft'
+    };
+    const { data, error } = await supabaseClient.from('customer_quotes').insert(dbData).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteCustomerQuote(id) {
+    const { error } = await supabaseClient.from('customer_quotes').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  // ===== CRM CUSTOMER ORDERS =====
+  async getCustomerOrders(customerId) {
+    const { data, error } = await supabaseClient.from('customer_orders').select('*').eq('customer_id', customerId).order('created_at', { ascending: true });
+    if (error) { console.error(error); return []; }
+    return data.map(d => ({...d, customerId: d.customer_id, orderDate: d.order_date, createdAt: d.created_at}));
+  },
+
+  async addCustomerOrder(orderData) {
+    const dbData = {
+      customer_id: orderData.customerId,
+      code: orderData.code,
+      order_date: orderData.orderDate,
+      value: Number(orderData.value || 0),
+      status: orderData.status || 'pending'
+    };
+    const { data, error } = await supabaseClient.from('customer_orders').insert(dbData).select().single();
+    if (error) throw error;
+    return data;
+  },
+
+  async deleteCustomerOrder(id) {
+    const { error } = await supabaseClient.from('customer_orders').delete().eq('id', id);
+    if (error) throw error;
+    return true;
+  },
+
+  // ===== CRM CUSTOMER LOGS =====
+  async getCustomerLogs(customerId) {
+    const { data, error } = await supabaseClient.from('customer_logs').select('*').eq('customer_id', customerId).order('created_at', { ascending: false });
+    if (error) { console.error(error); return []; }
+    return data.map(d => ({...d, customerId: d.customer_id, createdAt: d.created_at}));
   },
 
   // ===== CRM DEALS =====
@@ -420,13 +729,52 @@ window.Store = {
     
     const { data, error } = await query;
     if (error) { console.error(error); return []; }
-    return data.map(d => ({...d, customerId: d.customer_id, expectedCloseDate: d.expected_close_date, createdAt: d.created_at, value: Number(d.value)}));
+    return data.map(d => ({
+      ...d, 
+      customerId: d.customer_id, 
+      expectedCloseDate: d.expected_close_date, 
+      createdAt: d.created_at, 
+      value: Number(d.value || 0),
+      leadReason: d.lead_reason,
+      referrerEmployeeId: d.referrer_employee_id,
+      interestedProduct: d.interested_product,
+      consultantEmployeeId: d.consultant_employee_id,
+      expectedPrice: Number(d.expected_price || 0),
+      negotiateContent: d.negotiate_content,
+      negotiatePrice: Number(d.negotiate_price || 0),
+      negotiatorEmployeeId: d.negotiator_employee_id,
+      successReason: d.success_reason,
+      finalDealPrice: Number(d.final_deal_price || 0),
+      lastStageBeforeWon: d.last_stage_before_won,
+      contributorEmployeeIds: d.contributor_employee_ids || [],
+      lostReason: d.lost_reason,
+      lastStageBeforeLost: d.last_stage_before_lost
+    }));
   },
 
   async getDeal(id) {
     const { data, error } = await supabaseClient.from('deals').select('*').eq('id', id).single();
     if (error || !data) return null;
-    return {...data, customerId: data.customer_id, expectedCloseDate: data.expected_close_date, value: Number(data.value)};
+    return {
+      ...data, 
+      customerId: data.customer_id, 
+      expectedCloseDate: data.expected_close_date, 
+      value: Number(data.value || 0),
+      leadReason: data.lead_reason,
+      referrerEmployeeId: data.referrer_employee_id,
+      interestedProduct: data.interested_product,
+      consultantEmployeeId: data.consultant_employee_id,
+      expectedPrice: Number(data.expected_price || 0),
+      negotiateContent: data.negotiate_content,
+      negotiatePrice: Number(data.negotiate_price || 0),
+      negotiatorEmployeeId: data.negotiator_employee_id,
+      successReason: data.success_reason,
+      finalDealPrice: Number(data.final_deal_price || 0),
+      lastStageBeforeWon: data.last_stage_before_won,
+      contributorEmployeeIds: data.contributor_employee_ids || [],
+      lostReason: data.lost_reason,
+      lastStageBeforeLost: data.last_stage_before_lost
+    };
   },
 
   async getDealsByStage() {
@@ -440,31 +788,87 @@ window.Store = {
     const dbData = {
       title: dealData.title,
       customer_id: dealData.customerId,
-      value: dealData.value,
+      value: Number(dealData.value || 0),
       stage: dealData.stage || 'lead',
-      expected_close_date: dealData.expectedCloseDate
+      expected_close_date: dealData.expectedCloseDate || null,
+      lead_reason: dealData.leadReason || null,
+      referrer_employee_id: dealData.referrerEmployeeId || null,
+      interested_product: dealData.interestedProduct || null,
+      consultant_employee_id: dealData.consultantEmployeeId || null,
+      expected_price: Number(dealData.expectedPrice || 0),
+      negotiate_content: dealData.negotiateContent || null,
+      negotiate_price: Number(dealData.negotiatePrice || 0),
+      negotiator_employee_id: dealData.negotiatorEmployeeId || null,
+      success_reason: dealData.successReason || null,
+      final_deal_price: Number(dealData.finalDealPrice || 0),
+      last_stage_before_won: dealData.lastStageBeforeWon || null,
+      contributor_employee_ids: dealData.contributorEmployeeIds || [],
+      lost_reason: dealData.lostReason || null,
+      last_stage_before_lost: dealData.lastStageBeforeLost || null
     };
     const { data, error } = await supabaseClient.from('deals').insert(dbData).select().single();
     if (error) throw error;
-    return {...data, customerId: data.customer_id, expectedCloseDate: data.expected_close_date, value: Number(data.value)};
+    return {
+      ...data, 
+      customerId: data.customer_id, 
+      expectedCloseDate: data.expected_close_date, 
+      value: Number(data.value || 0)
+    };
   },
 
   async updateDeal(id, dealData) {
     const dbData = {};
     if (dealData.title !== undefined) dbData.title = dealData.title;
     if (dealData.customerId !== undefined) dbData.customer_id = dealData.customerId;
-    if (dealData.value !== undefined) dbData.value = dealData.value;
+    if (dealData.value !== undefined) dbData.value = Number(dealData.value || 0);
     if (dealData.stage !== undefined) dbData.stage = dealData.stage;
-    if (dealData.expectedCloseDate !== undefined) dbData.expected_close_date = dealData.expectedCloseDate;
+    if (dealData.expectedCloseDate !== undefined) dbData.expected_close_date = dealData.expectedCloseDate || null;
+    if (dealData.leadReason !== undefined) dbData.lead_reason = dealData.leadReason || null;
+    if (dealData.referrerEmployeeId !== undefined) dbData.referrer_employee_id = dealData.referrerEmployeeId || null;
+    if (dealData.interestedProduct !== undefined) dbData.interested_product = dealData.interestedProduct || null;
+    if (dealData.consultantEmployeeId !== undefined) dbData.consultant_employee_id = dealData.consultantEmployeeId || null;
+    if (dealData.expectedPrice !== undefined) dbData.expected_price = Number(dealData.expectedPrice || 0);
+    if (dealData.negotiateContent !== undefined) dbData.negotiate_content = dealData.negotiateContent || null;
+    if (dealData.negotiatePrice !== undefined) dbData.negotiate_price = Number(dealData.negotiatePrice || 0);
+    if (dealData.negotiatorEmployeeId !== undefined) dbData.negotiator_employee_id = dealData.negotiatorEmployeeId || null;
+    if (dealData.successReason !== undefined) dbData.success_reason = dealData.successReason || null;
+    if (dealData.finalDealPrice !== undefined) dbData.final_deal_price = Number(dealData.finalDealPrice || 0);
+    if (dealData.lastStageBeforeWon !== undefined) dbData.last_stage_before_won = dealData.lastStageBeforeWon || null;
+    if (dealData.contributorEmployeeIds !== undefined) dbData.contributor_employee_ids = dealData.contributorEmployeeIds || [];
+    if (dealData.lostReason !== undefined) dbData.lost_reason = dealData.lostReason || null;
+    if (dealData.lastStageBeforeLost !== undefined) dbData.last_stage_before_lost = dealData.lastStageBeforeLost || null;
 
     const { data, error } = await supabaseClient.from('deals').update(dbData).eq('id', id).select().single();
     if (error) throw error;
-    return {...data, customerId: data.customer_id, expectedCloseDate: data.expected_close_date, value: Number(data.value)};
+    return {
+      ...data, 
+      customerId: data.customer_id, 
+      expectedCloseDate: data.expected_close_date, 
+      value: Number(data.value || 0)
+    };
   },
 
   async deleteDeal(id) {
     const { error } = await supabaseClient.from('deals').delete().eq('id', id);
     if (error) throw error;
     return true;
+  },
+
+  async getAllCustomerNotesCount() {
+    const { count, error } = await supabaseClient.from('customer_notes').select('*', { count: 'exact', head: true });
+    if (error) { console.error(error); return 0; }
+    return count || 0;
+  },
+
+  async getAllCustomerContactsCount() {
+    const { count, error } = await supabaseClient.from('customer_contacts').select('*', { count: 'exact', head: true });
+    if (error) { console.error(error); return 0; }
+    return count || 0;
+  },
+
+  async getAllCustomerNotes() {
+    const { data, error } = await supabaseClient.from('customer_notes').select('*');
+    if (error) { console.error(error); return []; }
+    return data || [];
   }
 };

@@ -55,6 +55,7 @@ window.Pages.Payroll = {
               <tr>
                 <th>Nhân viên</th>
                 <th style="text-align:right;">Lương CB</th>
+                <th style="text-align:right;">Lương KPI</th>
                 <th style="text-align:center;">Công</th>
                 <th style="text-align:right;">Bảo hiểm (NV)</th>
                 <th style="text-align:right;">Thuế TNCN</th>
@@ -143,6 +144,7 @@ window.Pages.Payroll = {
             </div>
           </td>
           <td style="text-align:right;">${Utils.formatCurrency(r.baseSalary)}</td>
+          <td style="text-align:right;">${Utils.formatCurrency(r.kpiSalary || 0)}</td>
           <td style="text-align:center;">${r.actualWorkDays != null ? r.actualWorkDays : 22}/${r.workDays != null ? r.workDays : 22}</td>
           <td style="text-align:right;color:var(--color-warning);">${Utils.formatCurrency(totalInsEmp)}</td>
           <td style="text-align:right;color:var(--color-danger);">${Utils.formatCurrency(r.personalTax || 0)}</td>
@@ -199,6 +201,10 @@ window.Pages.Payroll = {
               <span style="font-weight:500;">${Utils.formatCurrency(record.baseSalary)}</span>
             </div>
             <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+              <span class="text-secondary">Lương KPI:</span>
+              <span style="font-weight:500;">${Utils.formatCurrency(record.kpiSalary || 0)}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
               <span class="text-secondary">Ngày công:</span>
               <span style="font-weight:500;">${record.actualWorkDays != null ? record.actualWorkDays : 22}/${record.workDays != null ? record.workDays : 22}</span>
             </div>
@@ -252,9 +258,9 @@ window.Pages.Payroll = {
       const rows = recs.map(r => {
         const emp = (this.employees || []).find(e => e.id === r.employeeId) || {};
         const insE = (r.bhxhEmployee || 0) + (r.bhytEmployee || 0) + (r.bhtnEmployee || 0);
-        return [emp.name || r.employeeId, r.baseSalary || 0, (r.actualWorkDays || 22) + '/' + (r.workDays || 22), insE, r.personalTax || 0, r.netSalary || r.baseSalary || 0];
+        return [emp.name || r.employeeId, r.baseSalary || 0, r.kpiSalary || 0, (r.actualWorkDays || 22) + '/' + (r.workDays || 22), insE, r.personalTax || 0, r.netSalary || r.baseSalary || 0];
       });
-      Utils.exportExcel({ name:'Luong ' + (this.currentMonth || ''), headers:['Nhân viên','Lương CB','Công','Bảo hiểm NV','Thuế TNCN','Thực nhận'], rows }, 'bizcore-luong-' + (this.currentMonth || '') + '.xlsx');
+      Utils.exportExcel({ name:'Luong ' + (this.currentMonth || ''), headers:['Nhân viên','Lương CB','Lương KPI','Công','Bảo hiểm NV','Thuế TNCN','Thực nhận'], rows }, 'bizcore-luong-' + (this.currentMonth || '') + '.xlsx');
       Components.showToast('Đã xuất bảng lương (' + rows.length + ' người)', 'success');
     } catch(e) { Components.showToast('Lỗi xuất Excel: ' + e.message, 'error'); }
   },

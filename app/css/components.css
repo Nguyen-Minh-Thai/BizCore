@@ -61,6 +61,7 @@
 .badge-warning{ background:var(--color-warning-bg); color:var(--color-warning); }
 .badge-danger{ background:var(--color-danger-bg); color:var(--color-danger); }
 .badge-info{ background:var(--color-info-bg); color:var(--color-info); }
+.badge-primary{ background:rgba(0, 102, 204, 0.12); color:#0066cc; }
 .badge-secondary{ background:var(--bg-hover); color:var(--text-secondary); }
 
 /* ===== TABLES ===== */

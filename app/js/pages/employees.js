@@ -67,6 +67,7 @@ window.Pages.Employees = {
                 <th>Vị trí / Chức vụ</th>
                 <th>Phòng ban</th>
                 <th>Lương cơ bản</th>
+                <th>KPI</th>
                 <th>Trạng thái</th>
                 <th style="text-align:right;">Thao tác</th>
               </tr>
@@ -132,11 +133,13 @@ window.Pages.Employees = {
     };
 
     if (paginated.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;" class="text-secondary">Không tìm thấy nhân viên nào</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;" class="text-secondary">Không tìm thấy nhân viên nào</td></tr>';
     } else {
       tbody.innerHTML = paginated.map(emp => {
         const dept = this.departments.find(d => d.id === emp.departmentId);
         const status = statusMap[emp.status] || { label: emp.status, variant: 'secondary' };
+        const isDirector = emp.role === 'admin' || (emp.position && (emp.position.toLowerCase().includes('giám đốc') || emp.position.toLowerCase().includes('director')));
+        const kpiText = isDirector ? 'None' : (emp.kpiSalary != null ? Utils.formatCurrency(emp.kpiSalary) : '—');
 
         return `
           <tr>
@@ -151,7 +154,8 @@ window.Pages.Employees = {
             </td>
             <td>${emp.position || 'Nhân viên'}</td>
             <td>${dept ? dept.name : '<span class="text-secondary">Chưa xếp</span>'}</td>
-            <td style="font-weight:500;">${Utils.formatCurrency(emp.baseSalary)}</td>
+            <td style="font-weight:500;">${emp.baseSalary != null ? Utils.formatCurrency(emp.baseSalary) : '—'}</td>
+            <td style="font-weight:500;">${kpiText}</td>
             <td>${Components.createBadge(status.label, status.variant)}</td>
             <td style="text-align:right;">
               <button class="btn btn-ghost btn-sm" onclick="window.Pages.Employees.showModal('${emp.id}')">Sửa</button>
@@ -249,6 +253,10 @@ window.Pages.Employees = {
         </div>
         <div class="form-row">
           <div class="form-group">
+            <label class="form-label">Lương KPI (VNĐ) *</label>
+            <input type="number" id="empKpiSalary" class="form-input" required min="0" step="100000" placeholder="Riêng Giám đốc nhập 0" value="${emp ? (emp.kpiSalary || 0) : '0'}">
+          </div>
+          <div class="form-group">
             <label class="form-label">Trạng thái</label>
             <select id="empStatus" class="form-input">
               <option value="active" ${emp && emp.status === 'active' ? 'selected' : ''}>Đang hoạt động</option>
@@ -276,15 +284,42 @@ window.Pages.Employees = {
     const roleEl = document.getElementById('empRole');
     const pwdEl = document.getElementById('empPassword');
 
+    const baseSalary = Number(document.getElementById('empSalary').value);
+    const kpiSalary = Number(document.getElementById('empKpiSalary').value);
+    const position = document.getElementById('empPosition').value;
+    const role = roleEl ? roleEl.value : 'employee';
+
+    const isDirector = role === 'admin' || position.toLowerCase().includes('giám đốc') || position.toLowerCase().includes('director');
+
+    if (!isDirector && baseSalary > 10000000) {
+      Components.showToast('Lương cơ bản không được vượt quá 10,000,000 VNĐ (riêng Giám đốc mới được vượt quá)', 'warning');
+      return;
+    }
+
+    if (isDirector) {
+      if (kpiSalary !== 0) {
+        Components.showToast('Giám đốc không có lương KPI (vui lòng nhập 0)', 'warning');
+        return;
+      }
+    } else {
+      const minKpi = baseSalary * 3;
+      const maxKpi = baseSalary * 7;
+      if (kpiSalary < minKpi || kpiSalary > maxKpi) {
+        Components.showToast(`Lương KPI phải dao động từ 3 đến 7 lần Lương cơ bản (${Utils.formatCurrency(minKpi)} - ${Utils.formatCurrency(maxKpi)})`, 'warning');
+        return;
+      }
+    }
+
     const data = {
       name: document.getElementById('empName').value,
       email: document.getElementById('empEmail').value,
       phone: document.getElementById('empPhone').value,
-      position: document.getElementById('empPosition').value,
+      position: position,
       departmentId: document.getElementById('empDept').value || null,
-      baseSalary: Number(document.getElementById('empSalary').value),
+      baseSalary: baseSalary,
+      kpiSalary: kpiSalary,
       status: document.getElementById('empStatus').value,
-      role: roleEl ? roleEl.value : 'employee',
+      role: role,
       password: pwdEl ? pwdEl.value : undefined
     };
 
@@ -314,9 +349,11 @@ window.Pages.Employees = {
       const st = { active: 'Đang làm', on_leave: 'Nghỉ phép', resigned: 'Đã nghỉ' };
       const rows = list.map(e => {
         const dept = (this.departments || []).find(d => d.id === e.departmentId);
-        return [e.name, e.email || '', e.phone || '', e.position || '', dept ? dept.name : '', e.baseSalary || 0, st[e.status] || e.status];
+        const isDirector = e.role === 'admin' || (e.position && (e.position.toLowerCase().includes('giám đốc') || e.position.toLowerCase().includes('director')));
+        const kpiVal = isDirector ? 'None' : (e.kpiSalary || 0);
+        return [e.name, e.email || '', e.phone || '', e.position || '', dept ? dept.name : '', e.baseSalary || 0, kpiVal, st[e.status] || e.status];
       });
-      Utils.exportExcel({ name: 'Nhân sự', headers: ['Họ tên', 'Email', 'SĐT', 'Chức vụ', 'Phòng ban', 'Lương cơ bản (đ)', 'Trạng thái'], rows }, 'bizcore-nhan-su.xlsx');
+      Utils.exportExcel({ name: 'Nhân sự', headers: ['Họ tên', 'Email', 'SĐT', 'Chức vụ', 'Phòng ban', 'Lương cơ bản (đ)', 'KPI (đ)', 'Trạng thái'], rows }, 'bizcore-nhan-su.xlsx');
       Components.showToast('Đã xuất ' + rows.length + ' nhân viên ra Excel', 'success');
     } catch (e) { Components.showToast('Lỗi xuất Excel: ' + e.message, 'error'); }
   },

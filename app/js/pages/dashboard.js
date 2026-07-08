@@ -190,13 +190,18 @@ window.Pages.Dashboard = {
         try {
           const departments = await Store.getDepartments();
           const employees = await Store.getEmployees();
+          const totalEmps = employees.length || 1;
           Charts.bar('chartEmployeeDept', {
-            labels: departments.map(d=>d.name),
+            labels: departments.map(d => {
+              const count = employees.filter(e=>e.departmentId===d.id).length;
+              const pct = ((count / totalEmps) * 100).toFixed(1);
+              return `${d.name} (${count} NV - ${pct}%)`;
+            }),
             datasets:[{ label:'Nhân viên', data: departments.map(d=>employees.filter(e=>e.departmentId===d.id).length),
               backgroundColor:['#0c6b57','#33417a','#a97c3f','#1a6a63','#3d4d90','#0e7a63','#c78a3c','#5a626c'] }]
           });
           const byStage = await Store.getDealsByStage();
-          const labelMap={lead:'Lead',qualified:'Qualified',proposal:'Báo giá',negotiation:'Đàm phán',won:'Thành công',lost:'Thất bại'};
+          const labelMap={lead:'Lead',qualified:'Tiềm năng',proposal:'Báo giá',negotiation:'Đàm phán',won:'Thành công',lost:'Thất bại'};
           const colorMap={lead:'#8d8377',qualified:'#33417a',proposal:'#a97c3f',negotiation:'#c78a3c',won:'#0c6b57',lost:'#bb362b'};
           const L=[],D=[],C=[];
           if(byStage) for(const [st,arr] of Object.entries(byStage)){ L.push(labelMap[st]||st); D.push(Array.isArray(arr)?arr.length:arr); C.push(colorMap[st]||'#8d8377'); }
