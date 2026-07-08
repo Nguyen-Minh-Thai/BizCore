@@ -200,6 +200,7 @@ window.Pages.Dashboard = {
             datasets:[{ label:'Nhân viên', data: departments.map(d=>employees.filter(e=>e.departmentId===d.id).length),
               backgroundColor:['#0c6b57','#33417a','#a97c3f','#1a6a63','#3d4d90','#0e7a63','#c78a3c','#5a626c'] }]
           });
+          const deals = await Store.getDeals();
           const byStage = await Store.getDealsByStage();
           const labelMap={lead:'Lead',qualified:'Tiềm năng',proposal:'Báo giá',negotiation:'Đàm phán',won:'Thành công',lost:'Thất bại'};
           const colorMap={lead:'#8d8377',qualified:'#33417a',proposal:'#a97c3f',negotiation:'#c78a3c',won:'#0c6b57',lost:'#bb362b'};
