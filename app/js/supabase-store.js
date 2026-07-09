@@ -797,6 +797,7 @@ window.Store = {
       createdAt: d.created_at, 
       value: Number(d.value || 0),
       leadReason: d.lead_reason,
+      leadSource: d.lead_source,
       referrerEmployeeId: d.referrer_employee_id,
       interestedProduct: d.interested_product,
       consultantEmployeeId: d.consultant_employee_id,
@@ -822,6 +823,7 @@ window.Store = {
       expectedCloseDate: data.expected_close_date, 
       value: Number(data.value || 0),
       leadReason: data.lead_reason,
+      leadSource: data.lead_source,
       referrerEmployeeId: data.referrer_employee_id,
       interestedProduct: data.interested_product,
       consultantEmployeeId: data.consultant_employee_id,
@@ -853,6 +855,7 @@ window.Store = {
       stage: dealData.stage || 'lead',
       expected_close_date: dealData.expectedCloseDate || null,
       lead_reason: dealData.leadReason || null,
+      lead_source: dealData.leadSource || null,
       referrer_employee_id: dealData.referrerEmployeeId || null,
       interested_product: dealData.interestedProduct || null,
       consultant_employee_id: dealData.consultantEmployeeId || null,
@@ -885,6 +888,7 @@ window.Store = {
     if (dealData.stage !== undefined) dbData.stage = dealData.stage;
     if (dealData.expectedCloseDate !== undefined) dbData.expected_close_date = dealData.expectedCloseDate || null;
     if (dealData.leadReason !== undefined) dbData.lead_reason = dealData.leadReason || null;
+    if (dealData.leadSource !== undefined) dbData.lead_source = dealData.leadSource || null;
     if (dealData.referrerEmployeeId !== undefined) dbData.referrer_employee_id = dealData.referrerEmployeeId || null;
     if (dealData.interestedProduct !== undefined) dbData.interested_product = dealData.interestedProduct || null;
     if (dealData.consultantEmployeeId !== undefined) dbData.consultant_employee_id = dealData.consultantEmployeeId || null;

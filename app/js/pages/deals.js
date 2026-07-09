@@ -249,6 +249,17 @@ window.Pages.Deals = {
               <textarea id="dealLeadReason" class="form-input" rows="3" placeholder="Ví dụ: Quảng cáo Facebook, Bạn bè giới thiệu...">${deal ? (deal.leadReason || '') : ''}</textarea>
             </div>
             <div class="form-group">
+              <label class="form-label">Nguồn khách</label>
+              <select id="dealLeadSource" class="form-input">
+                <option value="">-- Chọn nguồn khách --</option>
+                <option value="Gọi điện thoại" ${deal && deal.leadSource === 'Gọi điện thoại' ? 'selected' : ''}>Gọi điện thoại</option>
+                <option value="Email" ${deal && deal.leadSource === 'Email' ? 'selected' : ''}>Email</option>
+                <option value="Nền tảng Zalo" ${deal && deal.leadSource === 'Nền tảng Zalo' ? 'selected' : ''}>Nền tảng Zalo</option>
+                <option value="Mạng xã hội" ${deal && deal.leadSource === 'Mạng xã hội' ? 'selected' : ''}>Mạng xã hội</option>
+                <option value="Đi thị trường" ${deal && deal.leadSource === 'Đi thị trường' ? 'selected' : ''}>Đi thị trường</option>
+              </select>
+            </div>
+            <div class="form-group">
               <label class="form-label">Nhân viên giới thiệu</label>
               <select id="dealReferrerEmp" class="form-input">
                 <option value="">-- Chọn nhân viên --</option>
@@ -503,6 +514,7 @@ window.Pages.Deals = {
       value: value,
       
       leadReason: document.getElementById('dealLeadReason').value || null,
+      leadSource: document.getElementById('dealLeadSource').value || null,
       referrerEmployeeId: document.getElementById('dealReferrerEmp').value || null,
       
       interestedProduct: document.getElementById('dealInterestedProduct').value || null,

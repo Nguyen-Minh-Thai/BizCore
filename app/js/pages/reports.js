@@ -318,20 +318,36 @@ window.Pages.Reports = {
       }]
     });
 
-    // 2. Customer Sources
-    const sources = {};
-    customers.forEach(c => {
-      const src = c.source || 'Khác';
-      sources[src] = (sources[src] || 0) + 1;
+    // 2. Customer Sources (Thống kê nguồn khách hàng từ các Deal trong CRM)
+    const sources = {
+      'Gọi điện thoại': 0,
+      'Email': 0,
+      'Nền tảng Zalo': 0,
+      'Mạng xã hội': 0,
+      'Đi thị trường': 0,
+      'Khác': 0
+    };
+    deals.forEach(d => {
+      const src = d.leadSource || 'Khác';
+      if (sources[src] !== undefined) {
+        sources[src]++;
+      } else {
+        sources['Khác']++;
+      }
     });
-    const totalCustomers = customers.length || 1;
+
+    // Chỉ giữ lại các nguồn có dữ liệu (hoặc các nguồn chính) để vẽ biểu đồ
+    const activeSources = {};
+    Object.keys(sources).forEach(k => {
+      if (sources[k] > 0 || k !== 'Khác') {
+        activeSources[k] = sources[k];
+      }
+    });
 
     Charts.doughnut('chartCustomerSource', {
-      labels: Object.keys(sources).map(k => `${k} (${sources[k]} KH - ${((sources[k] / totalCustomers) * 100).toFixed(1)}%)`),
-      datasets: [{
-        data: Object.values(sources),
-        backgroundColor: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6', '#64748b']
-      }]
+      labels: Object.keys(activeSources),
+      data: Object.values(activeSources),
+      colors: ['#38bdf8', '#10b981', '#fbbf24', '#ec4899', '#8b5cf6', '#94a3b8']
     });
   },
 

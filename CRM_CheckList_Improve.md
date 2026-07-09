@@ -906,3 +906,22 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 #### Mục 22.1: Bổ sung lớp tiện ích .p-6 thiết lập padding cho các Card chứa Select Option
 * **Vị trí:** `base.css` (Dòng 91)
 * **Lý do:** Khắc phục lỗi hiển thị nhãn chữ `"Chọn nhân viên xem lịch"` bị chạm/đè lên đường viền trên của thẻ card (do thẻ sử dụng class `.p-6` nhưng class này chưa hề được định nghĩa trong hệ thống CSS). Thiết lập `.p-6 { padding: var(--space-6) !important; }` để tạo khoảng đệm trong 24px hợp lý cho toàn bộ các Card sử dụng lớp này, trả lại giao diện cân đối, thoáng đãng.
+
+---
+
+## 23. Phần bổ sung Giai đoạn 23 (Tích hợp trường Nguồn khách cho Deal và Cập nhật Biểu đồ Nguồn khách hàng)
+
+### File: CSDL & `app/js/supabase-store.js` & `app/js/pages/deals.js` & `app/js/pages/reports.js`
+
+#### Mục 23.1: Chạy lệnh SQL bổ sung cột CSDL
+* **Vị trí:** Chạy trong SQL Editor của Supabase
+* **Lệnh:**
+  ```sql
+  ALTER TABLE deals ADD COLUMN IF NOT EXISTS lead_source TEXT;
+  ```
+
+#### Mục 23.2: Cập nhật code thu thập trường nguồn khách và vẽ biểu đồ từ Deal
+* **Vị trí:**
+  * `supabase-store.js` (`getDeals`, `getDeal`, `addDeal`, `updateDeal`): Truy vấn và lưu thuộc tính `lead_source` của bảng `deals`.
+  * `deals.js`: Thêm thẻ `<select id="dealLeadSource">` chứa 5 nguồn chính dưới ô `"Lý do biết đến công ty"` trong tab Lead/Mới, đồng thời thu thập lưu trữ giá trị này khi lưu deal.
+  * `reports.js`: Sửa đổi logic tính toán của biểu đồ **Khách hàng theo nguồn** (`chartCustomerSource`), chuyển từ việc đếm từ bảng `customers` sang đếm trực tiếp thuộc tính `leadSource` từ danh sách `deals`.
