@@ -782,3 +782,48 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 #### Mục 14.1: Vẽ Tên thành phần và phần trăm trực tiếp trong lát cắt Doughnut
 * **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`)
 * **Lý do:** Cho phép hiển thị trực tiếp cả Tên thành phần (ví dụ: `Marketing`, `Nhân sự`, `Lead`, `Tiềm năng`...) và tỷ lệ phần trăm (`%`) của chúng ngay trên các lát cắt của biểu đồ tròn (chỉ áp dụng đối với lát cắt có tỷ lệ từ 12% trở lên để đảm bảo tính mỹ thuật và khoảng trống hiển thị).
+
+---
+
+## 15. Phần bổ sung Giai đoạn 15 (Cập nhật Ràng buộc Khóa ngoại ON DELETE CASCADE / SET NULL cho Nhân sự)
+
+### File: SQL CSDL
+* **Vị trí:** Chạy trực tiếp trong SQL Editor
+* **Nội dung:**
+  ```sql
+  -- Chấm công: tự động xóa khi nhân viên bị xóa
+  ALTER TABLE attendance DROP CONSTRAINT IF EXISTS attendance_employee_id_fkey;
+  ALTER TABLE attendance 
+    ADD CONSTRAINT attendance_employee_id_fkey 
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE;
+
+  -- Bảng lương: tự động xóa khi nhân viên bị xóa
+  ALTER TABLE payroll DROP CONSTRAINT IF EXISTS payroll_employee_id_fkey;
+  ALTER TABLE payroll 
+    ADD CONSTRAINT payroll_employee_id_fkey 
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE;
+
+  -- Phòng ban: đặt manager_id thành NULL khi nhân viên quản lý bị xóa
+  ALTER TABLE departments DROP CONSTRAINT IF EXISTS departments_manager_fk;
+  ALTER TABLE departments DROP CONSTRAINT IF EXISTS departments_manager_id_fkey;
+  ALTER TABLE departments 
+    ADD CONSTRAINT departments_manager_fk 
+    FOREIGN KEY (manager_id) REFERENCES employees(id) ON DELETE SET NULL;
+
+  -- Cơ hội (Deals): đặt các nhân viên liên quan thành NULL khi họ bị xóa khỏi công ty
+  ALTER TABLE deals DROP CONSTRAINT IF EXISTS deals_referrer_employee_id_fkey;
+  ALTER TABLE deals 
+    ADD CONSTRAINT deals_referrer_employee_id_fkey 
+    FOREIGN KEY (referrer_employee_id) REFERENCES employees(id) ON DELETE SET NULL;
+
+  ALTER TABLE deals DROP CONSTRAINT IF EXISTS deals_consultant_employee_id_fkey;
+  ALTER TABLE deals 
+    ADD CONSTRAINT deals_consultant_employee_id_fkey 
+    FOREIGN KEY (consultant_employee_id) REFERENCES employees(id) ON DELETE SET NULL;
+
+  ALTER TABLE deals DROP CONSTRAINT IF EXISTS deals_negotiator_employee_id_fkey;
+  ALTER TABLE deals 
+    ADD CONSTRAINT deals_negotiator_employee_id_fkey 
+    FOREIGN KEY (negotiator_employee_id) REFERENCES employees(id) ON DELETE SET NULL;
+  ```
+* **Lý do:** Khắc phục lỗi vi phạm ràng buộc khóa ngoại (foreign key constraint violation) khiến người dùng không thể xóa nhân viên nếu họ đã có lịch sử chấm công (`attendance`), bảng lương (`payroll`), đang làm quản lý bộ phận (`departments`), hoặc đang tham gia các deal trong CRM (`deals`).
