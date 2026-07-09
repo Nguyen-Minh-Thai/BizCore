@@ -400,6 +400,10 @@ window.AI = {
   // ===== THỰC THI LỆNH LÊN STORE =====
   async _executeToolCalls(toolCalls) {
     const results = [];
+    const role = Store.currentUser?.role;
+    const canManageHR = role === 'admin' || role === 'hr';
+    const canManageCRM = role === 'admin' || role === 'manager';
+
     for (const tc of toolCalls) {
       try {
         const name = tc.function.name;
@@ -407,6 +411,8 @@ window.AI = {
         let resultData = "";
 
         if (name === "updateEmployeeSalary") {
+          if (!canManageHR) { resultData = "Lỗi: Bạn không có quyền thay đổi lương."; }
+          else {
           const emp = await Store.getEmployee(args.employeeId);
           if (emp) {
             await Store.updateEmployee(args.employeeId, { baseSalary: args.newSalary });
@@ -414,8 +420,11 @@ window.AI = {
           } else {
             resultData = "Lỗi: Không tìm thấy nhân viên.";
           }
+          }
         } 
         else if (name === "updateDealStage") {
+          if (!canManageCRM) { resultData = "Lỗi: Bạn không có quyền cập nhật deal."; }
+          else {
           const deal = await Store.getDeal(args.dealId);
           if (deal) {
             await Store.updateDeal(args.dealId, { stage: args.newStage });
@@ -423,8 +432,12 @@ window.AI = {
           } else {
             resultData = "Lỗi: Không tìm thấy deal với ID này.";
           }
+          }
         }
         else if (name === "checkInEmployee") {
+          if (role === 'employee' && Store.currentUser.id !== args.employeeId) {
+            resultData = "Lỗi: Bạn chỉ có thể chấm công cho chính mình.";
+          } else {
           const emp = await Store.getEmployee(args.employeeId);
           if (emp) {
             const record = await Store.checkIn(args.employeeId);
@@ -432,14 +445,21 @@ window.AI = {
           } else {
              resultData = "Lỗi: Không tìm thấy nhân viên.";
           }
+          }
         }
         else if (name === "createDeal") {
+          if (!canManageCRM) { resultData = "Lỗi: Bạn không có quyền tạo deal."; }
+          else {
           const d = await Store.addDeal({ title: args.title, value: args.value || 0, stage: args.stage || 'lead' });
           resultData = `Đã tạo cơ hội "${args.title}" (${Utils.formatCurrency(args.value || 0)}) ở giai đoạn ${args.stage || 'lead'}.`;
+          }
         }
         else if (name === "createCustomer") {
+          if (!canManageCRM) { resultData = "Lỗi: Bạn không có quyền tạo khách hàng."; }
+          else {
           await Store.addCustomer({ name: args.name, status: args.status || 'lead' });
           resultData = `Đã tạo khách hàng "${args.name}" (trạng thái ${args.status || 'lead'}).`;
+          }
         }
         else {
           resultData = "Lỗi: Hàm không được hỗ trợ.";
@@ -463,9 +483,7 @@ window.AI = {
     const payrollTotal = payroll.reduce((s, p) => s + (p.netSalary || p.baseSalary || 0), 0);
     const active = employees.filter(e => e.status === 'active').length;
     const pipeline = deals.reduce((s, d) => s + (d.value || 0), 0);
-    const won = deals.filter(d => d.stage === 'won').length;
-    const closed = deals.filter(d => d.stage === 'won' || d.stage === 'lost').length;
-    const winRate = closed ? Math.round(won / closed * 100) : 0;
+    const winRate = Utils.calculateWinRate(deals);
     const deptLines = departments.map(dp => `- ${dp.name}: ${employees.filter(e => e.departmentId === dp.id).length} NV`).join('\n');
 
     return `Bạn là **BizCore AI** — trợ lý điều hành doanh nghiệp (HRM + CRM). Trả lời NGẮN GỌN, TIẾNG VIỆT, kèm số liệu.

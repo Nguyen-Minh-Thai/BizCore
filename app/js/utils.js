@@ -166,18 +166,48 @@ window.Utils = {
     return 'Chào buổi tối';
   },
 
+  _vnNow() {
+    return new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Ho_Chi_Minh' }));
+  },
+
   getCurrentDate() {
-    return new Date().toISOString().split('T')[0];
+    return this._vnNow().toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
   },
 
   getCurrentTime() {
-    const now = new Date();
+    const now = this._vnNow();
     return now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
   },
 
   getCurrentMonth() {
-    const now = new Date();
+    const now = this._vnNow();
     return now.getFullYear() + '-' + (now.getMonth() + 1).toString().padStart(2, '0');
+  },
+
+  getLastDayOfMonth(monthStr) {
+    if (!monthStr) return '31';
+    const [year, month] = monthStr.split('-').map(Number);
+    return String(new Date(year, month, 0).getDate()).padStart(2, '0');
+  },
+
+  getMonthEndDate(monthStr) {
+    return `${monthStr}-${this.getLastDayOfMonth(monthStr)}`;
+  },
+
+  getDateOffset(days) {
+    const d = this._vnNow();
+    d.setDate(d.getDate() + days);
+    return d.toLocaleDateString('en-CA', { timeZone: 'Asia/Ho_Chi_Minh' });
+  },
+
+  compareDates(a, b) {
+    return String(a).localeCompare(String(b));
+  },
+
+  calculateWinRate(deals) {
+    const closed = (deals || []).filter(d => d.stage === 'won' || d.stage === 'lost');
+    const won = closed.filter(d => d.stage === 'won').length;
+    return closed.length > 0 ? Math.round(won / closed.length * 100) : 0;
   },
 
   // Lấy chữ cái đầu tên

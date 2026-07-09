@@ -37,10 +37,12 @@ window.Pages.Customers = {
           <div style="display:flex;gap:12px;">
             <select id="cusStatusFilter" class="form-input" style="width:140px;">
               <option value="">Tất cả trạng thái</option>
-              <option value="lead">Lead mới</option>
+              <option value="lead">Lead / Mới</option>
               <option value="prospect">Tiềm năng</option>
-              <option value="customer">Khách hàng</option>
-              <option value="churned">Ngừng giao dịch</option>
+              <option value="quote">Báo giá</option>
+              <option value="negotiate">Đàm phán</option>
+              <option value="won">Thành công (Won)</option>
+              <option value="lost">Thất bại (Lost)</option>
             </select>
           </div>
         </div>
@@ -1046,18 +1048,6 @@ window.Pages.Customers = {
         }).join('')}
       </div>
     `;
-  },
-
-  async deleteCus(id) {
-    Components.showConfirm('Xác nhận xóa', 'Bạn có chắc chắn muốn xóa khách hàng này? Mọi cơ hội bán hàng (Deals) liên quan cũng có thể bị ảnh hưởng.', async () => {
-      try {
-        await Store.deleteCustomer(id);
-        Components.showToast('Đã xóa khách hàng', 'success');
-        await this.loadData();
-      } catch(e) {
-        Components.showToast('Lỗi xóa dữ liệu: ' + e.message, 'error');
-      }
-    });
   },
 
   unmount() {}

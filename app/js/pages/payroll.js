@@ -25,10 +25,11 @@ window.Pages.Payroll = {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             Xuất Excel
           </button>
+          ${(Store.currentUser && (Store.currentUser.role === 'admin' || Store.currentUser.role === 'hr')) ? `
           <button class="btn btn-primary" onclick="window.Pages.Payroll.doGeneratePayroll()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             Tính lương tháng này
-          </button>
+          </button>` : ''}
         </div>
       </div>
 

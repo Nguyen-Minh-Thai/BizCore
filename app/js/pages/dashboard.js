@@ -14,11 +14,10 @@ window.Pages.Dashboard = {
   _computeSignals({ employees, deals, customers, payroll, prevPayroll, attMonth }) {
     const U = window.Utils;
     const signals = [];
-    const today = new Date(U.getCurrentDate());
+    const today = U.getCurrentDate();
 
-    // 1. Cơ hội quá hạn chốt (deal open, expectedCloseDate < hôm nay)
     const overdue = (deals || []).filter(d => d.stage !== 'won' && d.stage !== 'lost'
-      && d.expectedCloseDate && new Date(d.expectedCloseDate) < today);
+      && d.expectedCloseDate && U.compareDates(d.expectedCloseDate, today) < 0);
     if (overdue.length) {
       const val = overdue.reduce((s, d) => s + (d.value || 0), 0);
       signals.push({ sev:'d', title:`${overdue.length} cơ hội trị giá ${U.formatCurrency(val)} đã quá hạn chốt`,
@@ -102,9 +101,7 @@ window.Pages.Dashboard = {
     const activeEmp = employees.filter(e => e.status === 'active').length;
     const payrollTotal = payroll.reduce((s,p)=>s+(p.netSalary||p.baseSalary||0),0);
     const weighted = deals.reduce((s,d)=> s + (d.value||0) * (STAGE_PROB[d.stage] ?? 0), 0);
-    const closed = deals.filter(d=>d.stage==='won'||d.stage==='lost');
-    const won = deals.filter(d=>d.stage==='won');
-    const winRate = closed.length ? Math.round(won.length/closed.length*100) : 0;
+    const winRate = U.calculateWinRate(deals);
 
     const signals = this._computeSignals({ employees, deals, customers, payroll, prevPayroll, attMonth });
 
@@ -112,7 +109,7 @@ window.Pages.Dashboard = {
       this._kpi('users','', activeEmp, 'Nhân sự đang làm việc', {dir:'up', v:activeEmp}),
       this._kpi('dollar','neutral', U.formatCurrency(payrollTotal), 'Quỹ lương tháng '+month.split('-')[1], null),
       this._kpi('trend','', U.formatCurrency(weighted), 'Dự báo pipeline (trọng số)', {dir:'up', v:deals.length}),
-      this._kpi('target','slate', winRate+'%', 'Tỷ lệ chốt deal', {dir: winRate>=30?'up':'down', v:closed.length})
+      this._kpi('target','slate', winRate+'%', 'Tỷ lệ chốt deal', {dir: winRate>=30?'up':'down', v:deals.filter(d=>d.stage==='won'||d.stage==='lost').length})
     ].join('');
 
     const signalsHTML = signals.length ? signals.map(s => `
@@ -231,7 +228,10 @@ window.Pages.Dashboard = {
         { name:'Cơ hội', headers:['Tên cơ hội','Giai đoạn','Giá trị (đ)','Dự kiến chốt'],
           rows: deals.map(d => [d.title||'', d.stage, d.value||0, d.expectedCloseDate||'']) },
         { name:'Lương '+month, headers:['Nhân viên','Lương CB','Thực nhận','Thuế TNCN','BHXH NV'],
-          rows: pay.map(p => [p.employeeId, p.baseSalary||0, p.netSalary||0, p.personalTax||0, p.bhxhEmployee||0]) }
+          rows: pay.map(p => {
+            const emp = emps.find(e => e.id === p.employeeId);
+            return [emp ? emp.name : p.employeeId, p.baseSalary||0, p.netSalary||0, p.personalTax||0, p.bhxhEmployee||0];
+          }) }
       ];
       U.exportExcel(sheets, 'bizcore-bao-cao-' + month + '.xlsx');
       if (window.Components) Components.showToast('Đã xuất báo cáo Excel (3 sheet)', 'success');

@@ -169,14 +169,16 @@ window.Pages.Deals = {
     if (dealId) {
       const deal = this.deals.find(d => d.id === dealId);
       if (deal && deal.stage !== stageId) {
+        const prevStage = deal.stage;
         deal.stage = stageId;
         this.renderKanban();
         
         try {
           await Store.updateDeal(dealId, { stage: stageId });
         } catch(err) {
+          deal.stage = prevStage;
+          this.renderKanban();
           Components.showToast('Lỗi cập nhật trạng thái: ' + err.message, 'error');
-          await this.loadData();
         }
       }
     }
