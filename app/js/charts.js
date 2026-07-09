@@ -287,9 +287,9 @@ window.Charts = {
       const color = (colors && colors[i]) || this.COLORS[i % this.COLORS.length];
       ctx.fillStyle = color;
       ctx.beginPath(); ctx.arc(legendX, legendY, 5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#f1f5f9'; ctx.font = '12px Inter,sans-serif'; ctx.textAlign = 'left';
+      ctx.fillStyle = '#000000'; ctx.font = 'bold 12px Inter,sans-serif'; ctx.textAlign = 'left';
       ctx.fillText(label, legendX + 14, legendY + 4);
-      ctx.fillStyle = '#94a3b8'; ctx.font = '11px Inter,sans-serif';
+      ctx.fillStyle = '#4b5563'; ctx.font = 'bold 11px Inter,sans-serif'; // Dark grey/black for subtext
       const pct = Math.round((data[i] / total) * 100);
       ctx.fillText(`${data[i].toLocaleString()} (${pct}%)`, legendX + 14, legendY + 20);
       legendY += 36;

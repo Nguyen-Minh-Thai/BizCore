@@ -827,3 +827,13 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
     FOREIGN KEY (negotiator_employee_id) REFERENCES employees(id) ON DELETE SET NULL;
   ```
 * **Lý do:** Khắc phục lỗi vi phạm ràng buộc khóa ngoại (foreign key constraint violation) khiến người dùng không thể xóa nhân viên nếu họ đã có lịch sử chấm công (`attendance`), bảng lương (`payroll`), đang làm quản lý bộ phận (`departments`), hoặc đang tham gia các deal trong CRM (`deals`).
+
+---
+
+## 16. Phần bổ sung Giai đoạn 16 (Đổi màu text chú thích biểu đồ tròn sang màu đen)
+
+### File: `app/js/charts.js`
+
+#### Mục 16.1: Thay đổi mã màu text chú thích (Legend Labels & Subtext) trong Canvas Doughnut Chart
+* **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`)
+* **Lý do:** Đổi mã màu hiển thị nhãn chú thích bên phải của biểu đồ tròn (gồm: Cơ hội theo giai đoạn, Khách hàng theo nguồn, Tỷ lệ nhân sự theo phòng ban) từ màu trắng `#f1f5f9` và xám nhạt `#94a3b8` sang màu đen đậm `#000000` (subtext `#4b5563`) để tăng độ tương phản rõ rệt, giúp dễ đọc trên nền sáng.
