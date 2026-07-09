@@ -408,7 +408,7 @@ window.Pages.Reports = {
       datasets: [{
         label: 'Tỷ lệ chuyên cần (%)',
         data: oleData,
-        color: '#6ee7b7'
+        color: '#14b8a6'
       }]
     });
   },

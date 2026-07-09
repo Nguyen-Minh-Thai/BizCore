@@ -974,4 +974,14 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
   * `dashboard.js` (Hàm `mount` của đối tượng `Dashboard`, phần khai báo `chartEmployeeDept`)
 * **Lý do:** Đồng bộ hóa hai biểu đồ cột này sang màu **xanh ngọc Teal (`#14b8a6`)** - là màu xanh của nguồn khách hàng *Mạng xã hội* mà người dùng mong muốn, thay thế cho dải màu đa sắc lộn xộn cũ.
 
+---
+
+## 28. Phần bổ sung Giai đoạn 28 (Đổi màu OLE Performance sang xanh ngọc Mạng xã hội)
+
+### File: `app/js/pages/reports.js`
+
+#### Mục 28.1: Thiết lập màu cột OLE sang màu xanh ngọc Teal của Mạng xã hội
+* **Vị trí:** `reports.js` (Hàm `initHRCharts` của đối tượng `Reports`, phần khai báo `chartOLEPerformance`)
+* **Lý do:** Đồng bộ hóa màu sắc cột của biểu đồ **Hiệu quả lao động tổng thể (OLE) theo bộ phận** sang màu **xanh ngọc Teal (`#14b8a6`)** - màu xanh của nguồn khách hàng *Mạng xã hội* theo đúng danh sách yêu cầu mới từ người dùng.
+
 
