@@ -132,6 +132,8 @@ window.Pages.Employees = {
       'resigned': { label: 'Đã nghỉ', variant: 'danger' }
     };
 
+    const canManage = Store.currentUser && (Store.currentUser.role === 'admin' || Store.currentUser.role === 'hr');
+
     if (paginated.length === 0) {
       tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:32px;" class="text-secondary">Không tìm thấy nhân viên nào</td></tr>';
     } else {
@@ -158,8 +160,10 @@ window.Pages.Employees = {
             <td style="font-weight:500;">${kpiText}</td>
             <td>${Components.createBadge(status.label, status.variant)}</td>
             <td style="text-align:right;">
+              ${canManage ? `
               <button class="btn btn-ghost btn-sm" onclick="window.Pages.Employees.showModal('${emp.id}')">Sửa</button>
               <button class="btn btn-ghost btn-sm" style="color:var(--color-danger);" onclick="window.Pages.Employees.deleteEmp('${emp.id}')">Xóa</button>
+              ` : '<span class="text-secondary">—</span>'}
             </td>
           </tr>
         `;

@@ -77,11 +77,16 @@ window.Pages.Simulator = {
         if (deptId) emps = emps.filter(e => String(e.departmentId) === String(deptId));
         const base = emps.reduce((s,e) => s + (e.baseSalary || 0), 0);
         const dGross = base * pct / 100;
-        const dCompMonth = dGross * 1.215;
+        const dInsEmp = dGross * 0.105;
+        const dTax = U.calculatePersonalTax(Math.max(0, dGross - dInsEmp));
+        const dNetEmp = dGross - dInsEmp - dTax;
+        const dCompMonth = dGross + dGross * 0.215;
         const dCompYear = dCompMonth * 12;
         document.getElementById('sim-result').innerHTML =
           this._res('Số nhân sự ảnh hưởng', emps.length + ' người') +
           this._res('Tăng lương gộp / tháng', U.formatCurrency(dGross)) +
+          this._res('BH + Thuế NV', U.formatCurrency(dInsEmp + dTax), 'phần nhân viên đóng thêm', 'var(--color-warning)') +
+          this._res('Thực nhận NV tăng thêm', U.formatCurrency(dNetEmp)) +
           this._res('+ BHXH DN (21.5%)', U.formatCurrency(dGross*0.215), 'phần doanh nghiệp đóng thêm', 'var(--brass-600, #a97c3f)') +
           this._res('Tổng chi phí tăng / tháng', U.formatCurrency(dCompMonth), null, 'var(--color-danger)') +
           this._res('Tổng chi phí tăng / năm', U.formatCurrency(dCompYear), null, 'var(--color-danger)') +
@@ -103,9 +108,12 @@ window.Pages.Simulator = {
         const sal = +document.getElementById('sc-sal').value || 0;
         document.getElementById('sc-n-v').textContent = n + ' người';
         const grossM = n * sal;
-        const costM = grossM * 1.215;
+        const insEmp = grossM * 0.105;
+        const tax = U.calculatePersonalTax(Math.max(0, grossM - insEmp));
+        const costM = grossM + grossM * 0.215;
         document.getElementById('sim-result').innerHTML =
           this._res('Lương gộp / tháng', U.formatCurrency(grossM)) +
+          this._res('BH + Thuế NV', U.formatCurrency(insEmp + tax), 'chi phí khấu trừ từ lương NV', 'var(--color-warning)') +
           this._res('+ BHXH DN (21.5%)', U.formatCurrency(grossM*0.215), null, '#a97c3f') +
           this._res('Chi phí thật / tháng', U.formatCurrency(costM), null, 'var(--color-danger)') +
           this._res('Chi phí thật / năm', U.formatCurrency(costM*12), null, 'var(--color-danger)') +

@@ -16,9 +16,59 @@ window.Store = {
   async init() {
     console.log("Supabase Store initialized");
     const savedUser = localStorage.getItem('bizcore_user');
-    if (savedUser) {
-      this.currentUser = JSON.parse(savedUser);
+    if (!savedUser || !supabaseClient) return;
+
+    try {
+      const parsed = JSON.parse(savedUser);
+      const { data, error } = await supabaseClient
+        .from('employees')
+        .select('id, name, email, role, department_id, status')
+        .eq('id', parsed.id)
+        .single();
+
+      if (!error && data && data.status === 'active') {
+        this.currentUser = {
+          id: data.id,
+          name: data.name,
+          email: data.email,
+          role: data.role,
+          departmentId: data.department_id
+        };
+        localStorage.setItem('bizcore_user', JSON.stringify(this.currentUser));
+      } else {
+        this.currentUser = null;
+        localStorage.removeItem('bizcore_user');
+      }
+    } catch {
+      this.currentUser = null;
+      localStorage.removeItem('bizcore_user');
     }
+  },
+
+  _canViewSensitiveSalary(employeeId, departmentId) {
+    if (!this.currentUser) return false;
+    if (this.currentUser.role === 'admin' || this.currentUser.role === 'hr') return true;
+    if (this.currentUser.id === employeeId) return true;
+    if (this.currentUser.role === 'manager' && this.currentUser.departmentId === departmentId) return true;
+    return false;
+  },
+
+  _mapEmployee(d, maskSalary = true) {
+    const canView = maskSalary ? this._canViewSensitiveSalary(d.id, d.department_id) : true;
+    return {
+      ...d,
+      departmentId: d.department_id,
+      baseSalary: canView ? Number(d.base_salary) : null,
+      kpiSalary: canView ? Number(d.kpi_salary || 0) : null,
+      password: null,
+      hireDate: d.hire_date,
+      exitDate: d.exit_date,
+      createdAt: d.created_at
+    };
+  },
+
+  _logAction() {
+    return this.currentUser?.name || 'Hệ thống';
   },
 
   async login(email, password) {
@@ -59,13 +109,13 @@ window.Store = {
     const employees = await this.getEmployees();
     const deals = await this.getDeals();
     const customers = await this.getCustomers();
-    const wonDeals = deals.filter(d => d.stage === 'won');
+    const openDeals = deals.filter(d => d.stage !== 'won' && d.stage !== 'lost');
     
     return {
       activeEmployees: employees.filter(e => e.status === 'active').length,
-      newCustomers: customers.filter(c => c.status === 'new' || c.status === 'lead').length,
-      pipelineValue: deals.reduce((s, d) => s + Number(d.value || 0), 0),
-      winRate: deals.length > 0 ? Math.round((wonDeals.length / deals.length) * 100) : 0
+      newCustomers: customers.filter(c => c.status === 'lead' || c.status === 'prospect').length,
+      pipelineValue: openDeals.reduce((s, d) => s + Number(d.value || 0), 0),
+      winRate: Utils.calculateWinRate(deals)
     };
   },
 
@@ -81,43 +131,19 @@ window.Store = {
     const { data, error } = await query;
     if (error) { console.error(error); return []; }
     
-    return data.map(d => {
-      // Hide sensitive data if not HR/Admin or self
-      let isSensitive = false;
-      if (this.currentUser) {
-        if (this.currentUser.role === 'admin' || this.currentUser.role === 'hr') isSensitive = true;
-        if (this.currentUser.id === d.id) isSensitive = true;
-        if (this.currentUser.role === 'manager' && this.currentUser.departmentId === d.department_id) isSensitive = true;
-      }
-      
-      return {
-        ...d, 
-        departmentId: d.department_id, 
-        baseSalary: isSensitive ? Number(d.base_salary) : null, // Mask salary
-        kpiSalary: isSensitive ? Number(d.kpi_salary || 0) : null, // Mask KPI salary
-        password: null, // Always mask password
-        hireDate: d.hire_date, // <-- Map ngày vào
-        exitDate: d.exit_date, // <-- Map ngày rời
-        createdAt: d.created_at
-      };
-    });
+    return data.map(d => this._mapEmployee(d));
   },
 
   async getEmployee(id) {
     const { data, error } = await supabaseClient.from('employees').select('*').eq('id', id).single();
     if (error || !data) return null;
-    return {
-      ...data, 
-      departmentId: data.department_id, 
-      baseSalary: Number(data.base_salary), 
-      kpiSalary: Number(data.kpi_salary || 0),
-      hireDate: data.hire_date, 
-      exitDate: data.exit_date, 
-      createdAt: data.created_at
-    }; // <-- Map ngày vào/rời khi lấy 1 NV
+    return this._mapEmployee(data);
   },
 
   async addEmployee(employeeData) {
+    if (!this.currentUser || !['admin', 'hr'].includes(this.currentUser.role)) {
+      throw new Error('Không có quyền thêm nhân viên');
+    }
     const dbData = {
       name: employeeData.name,
       email: employeeData.email,
@@ -138,6 +164,9 @@ window.Store = {
   },
 
   async updateEmployee(id, employeeData) {
+    if (!this.currentUser || !['admin', 'hr'].includes(this.currentUser.role)) {
+      throw new Error('Không có quyền cập nhật nhân viên');
+    }
     const dbData = {};
     if (employeeData.name !== undefined) dbData.name = employeeData.name;
     if (employeeData.email !== undefined) dbData.email = employeeData.email;
@@ -157,6 +186,9 @@ window.Store = {
   },
 
   async deleteEmployee(id) {
+    if (!this.currentUser || !['admin', 'hr'].includes(this.currentUser.role)) {
+      throw new Error('Không có quyền xóa nhân viên');
+    }
     const { error } = await supabaseClient.from('employees').delete().eq('id', id);
     if (error) throw error;
     return true;
@@ -208,11 +240,21 @@ window.Store = {
     if (filters.employeeId) query = query.eq('employee_id', filters.employeeId);
     if (filters.date) query = query.eq('date', filters.date);
     if (filters.status) query = query.eq('status', filters.status);
-    if (filters.month) query = query.gte('date', `${filters.month}-01`).lte('date', `${filters.month}-31`);
+    if (filters.month) {
+      query = query.gte('date', `${filters.month}-01`).lte('date', Utils.getMonthEndDate(filters.month));
+    }
+    if (filters.startDate) query = query.gte('date', filters.startDate);
+    if (filters.endDate) query = query.lte('date', filters.endDate);
     
     const { data, error } = await query;
     if (error) { console.error(error); return []; }
-    return data.map(d => ({...d, employeeId: d.employee_id, checkIn: d.check_in, checkOut: d.check_out}));
+    return data.map(d => ({
+      ...d,
+      employeeId: d.employee_id,
+      checkIn: d.check_in,
+      checkOut: d.check_out,
+      workHours: Number(d.work_hours || 0)
+    }));
   },
 
   async getTodayAttendance() {
@@ -221,16 +263,17 @@ window.Store = {
   },
 
   async getAttendanceByMonth(month) { // YYYY-MM
-    let query = supabaseClient.from('attendance').select('*').gte('date', `${month}-01`).lte('date', `${month}-31`);
+    let query = supabaseClient.from('attendance').select('*')
+      .gte('date', `${month}-01`)
+      .lte('date', Utils.getMonthEndDate(month));
     
-    // RBAC: Limit attendance view
     if (this.currentUser) {
       if (this.currentUser.role === 'employee') {
         query = query.eq('employee_id', this.currentUser.id);
       } else if (this.currentUser.role === 'manager') {
-        // Find employees in manager's dept
         const emps = await this.getEmployees({ departmentId: this.currentUser.departmentId });
         const empIds = emps.map(e => e.id);
+        if (empIds.length === 0) return [];
         query = query.in('employee_id', empIds);
       }
     }
@@ -244,6 +287,9 @@ window.Store = {
   },
 
   async checkIn(employeeId) {
+    if (this.currentUser?.role === 'employee' && this.currentUser.id !== employeeId) {
+      throw new Error('Bạn chỉ có thể chấm công cho chính mình');
+    }
     const today = Utils.getCurrentDate();
     const existing = await this.getAttendanceRecords({ employeeId, date: today });
     if (existing.length > 0) return existing[0];
@@ -264,18 +310,23 @@ window.Store = {
   },
 
   async checkOut(employeeId) {
+    if (this.currentUser?.role === 'employee' && this.currentUser.id !== employeeId) {
+      throw new Error('Bạn chỉ có thể chấm công cho chính mình');
+    }
     const today = Utils.getCurrentDate();
     const records = await this.getAttendanceRecords({ employeeId, date: today });
     if (records.length === 0) return null;
     const record = records[0];
     
     const time = Utils.getCurrentTime();
+    const workHours = Utils.calculateWorkHours(record.checkIn, time);
     const { data, error } = await supabaseClient.from('attendance').update({
-      check_out: time
+      check_out: time,
+      work_hours: workHours
     }).eq('id', record.id).select().single();
     
     if (error) throw error;
-    return {...data, employeeId: data.employee_id, checkIn: data.check_in, checkOut: data.check_out};
+    return {...data, employeeId: data.employee_id, checkIn: data.check_in, checkOut: data.check_out, workHours: Number(data.work_hours)};
   },
 
   async getMonthlyAttendanceSummary(employeeId, month) {
@@ -286,8 +337,8 @@ window.Store = {
       lateDays: records.filter(r => r.status === 'late').length,
       absentDays: records.filter(r => r.status === 'absent').length,
       leaveDays: records.filter(r => r.status === 'leave').length,
-      totalHours: 0,
-      hasRecords: records.length > 0 // <-- Đánh dấu có dữ liệu chấm công hay không
+      totalHours: records.reduce((s, r) => s + Number(r.workHours || 0), 0),
+      hasRecords: records.length > 0
     };
   },
 
@@ -331,9 +382,17 @@ window.Store = {
   },
 
   async generatePayroll(month) {
-    const employees = await this.getEmployees({ status: 'active' });
+    if (!this.currentUser || !['admin', 'hr'].includes(this.currentUser.role)) {
+      throw new Error('Chỉ Admin/HR mới được tính lương');
+    }
+
+    const { data: rawEmployees, error: empError } = await supabaseClient
+      .from('employees')
+      .select('*')
+      .eq('status', 'active');
+    if (empError) throw empError;
+    const employees = rawEmployees.map(d => this._mapEmployee(d, false));
     
-    // Đồng bộ: Xóa sạch bảng lương cũ của tháng này trước khi tính toán lại để cập nhật lương cơ bản mới từ mục nhân sự
     await supabaseClient.from('payroll').delete().eq('month', month);
 
     const newRecords = [];
@@ -342,8 +401,10 @@ window.Store = {
       const workDays = Utils.getWorkingDaysInMonth(month);
       const actualDays = summary.hasRecords ? summary.presentDays : workDays;
       
-      const prorated = Math.round(emp.baseSalary * (actualDays / workDays));
-      let kpiProrated = Math.round((emp.kpiSalary || 0) * (actualDays / workDays));
+      const baseSalary = Number(emp.baseSalary) || 0;
+      const kpiSalary = Number(emp.kpiSalary) || 0;
+      const prorated = Math.round(baseSalary * (actualDays / workDays));
+      let kpiProrated = Math.round(kpiSalary * (actualDays / workDays));
       
       // Áp dụng biến động KPI theo yêu cầu khách hàng:
       if (emp.kpiSalary > 0) {
@@ -381,15 +442,13 @@ window.Store = {
       const bhytC = paysInsurance ? Math.round(prorated * 0.03) : 0;
       const bhtnC = paysInsurance ? Math.round(prorated * 0.01) : 0;
       
-      // TNCN = (Lương cơ bản + Lương kpi + Phụ cấp) * 10%
-      const tax = Math.round((prorated + kpiProrated + allowances) * 0.1);
-      
-      // Thực nhận = Lương cơ bản + Lương kpi + Phụ cấp - Bảo hiểm - Thuế TNCN
-      const net = prorated + kpiProrated + allowances - totalInsuranceE - tax;
+      const grossIncome = prorated + kpiProrated + allowances;
+      const tax = Utils.calculatePersonalTax(Math.max(0, grossIncome - totalInsuranceE));
+      const net = grossIncome - totalInsuranceE - tax;
       
       const record = {
         employee_id: emp.id, month: month,
-        base_salary: emp.baseSalary, 
+        base_salary: prorated,
         kpi_salary: kpiProrated,
         net_salary: net,
         personal_tax: tax,
@@ -455,7 +514,8 @@ window.Store = {
     try {
       await supabaseClient.from('customer_logs').insert({
         customer_id: data.id,
-        action: 'Tạo khách hàng mới trên hệ thống'
+        action: 'Tạo khách hàng mới trên hệ thống',
+        created_by: this._logAction()
       });
     } catch(e) {
       console.error("Lỗi ghi log addCustomer:", e);
@@ -503,7 +563,7 @@ window.Store = {
           logs.push(`Thay đổi tên khách hàng từ "${oldData.name}" thành "${dbData.name}"`);
         }
         for (const action of logs) {
-          await supabaseClient.from('customer_logs').insert({ customer_id: id, action });
+          await supabaseClient.from('customer_logs').insert({ customer_id: id, action, created_by: this._logAction() });
         }
       }
     } catch(e) {
@@ -551,7 +611,8 @@ window.Store = {
     try {
       await supabaseClient.from('customer_logs').insert({
         customer_id: noteData.customerId,
-        action: `Thêm ghi chú mới: "${noteData.content.substring(0, 30)}${noteData.content.length > 30 ? '...' : ''}"`
+        action: `Thêm ghi chú mới: "${noteData.content.substring(0, 30)}${noteData.content.length > 30 ? '...' : ''}"`,
+        created_by: this._logAction()
       });
     } catch(e) {
       console.error(e);
@@ -864,6 +925,12 @@ window.Store = {
     const { count, error } = await supabaseClient.from('customer_contacts').select('*', { count: 'exact', head: true });
     if (error) { console.error(error); return 0; }
     return count || 0;
+  },
+
+  async getAllCustomerOrders() {
+    const { data, error } = await supabaseClient.from('customer_orders').select('*');
+    if (error) { console.error(error); return []; }
+    return data.map(d => ({...d, customerId: d.customer_id, orderDate: d.order_date, createdAt: d.created_at}));
   },
 
   async getAllCustomerNotes() {

@@ -51,14 +51,21 @@ window.Pages.Reports = {
   },
 
   _renderRevenueContent() {
-    // Calculated dynamic values or mock data where needed
-    const customersCount = this.data.customers.length;
+    const month = Utils.getCurrentMonth();
+    const monthStart = `${month}-01`;
+    const monthEnd = Utils.getMonthEndDate(month);
+
+    const newCustomers = this.data.customers.filter(c => {
+      const created = (c.createdAt || '').substring(0, 10);
+      return created >= monthStart && created <= monthEnd;
+    }).length;
+
     const dealsCount = this.data.deals.length;
     const wonDeals = this.data.deals.filter(d => d.stage === 'won');
     const wonCount = wonDeals.length;
     const totalWonValue = wonDeals.reduce((s, d) => s + Number(d.value || 0), 0);
+    const orderCount = (this.data.orders || []).length;
     
-    // Đếm tương tác thực tế từ CSDL theo Phương án 2 (quét từ khóa trong ghi chú)
     const notes = this.data.notes || [];
     let smsCount = 0;
     let callCount = 0;
@@ -66,20 +73,17 @@ window.Pages.Reports = {
 
     notes.forEach(n => {
       const txt = (n.content || '').toLowerCase();
-      let matched = false;
       if (txt.includes('sms') || txt.includes('tin nhắn') || txt.includes('nhắn tin')) {
         smsCount++;
-        matched = true;
-      }
-      if (txt.includes('gọi') || txt.includes('call') || txt.includes('cuộc gọi') || txt.includes('điện thoại')) {
+      } else if (txt.includes('gọi') || txt.includes('call') || txt.includes('cuộc gọi') || txt.includes('điện thoại')) {
         callCount++;
-        matched = true;
+      } else {
+        notesCount++;
       }
-      
-      notesCount++;
     });
 
     const totalInteractions = notesCount + smsCount + callCount;
+    const winRate = Utils.calculateWinRate(this.data.deals);
 
     return `
       <!-- Conversion Rate Widgets Grid -->
@@ -92,8 +96,8 @@ window.Pages.Reports = {
               <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">Khách hàng mới</span>
               <span style="font-size: 20px;">👤</span>
             </div>
-            <div style="font-size: 24px; font-weight: 800; color: var(--text-primary);">${customersCount}</div>
-            <div style="font-size: 12px; color: var(--text-muted);">Đã đăng ký tài khoản</div>
+            <div style="font-size: 24px; font-weight: 800; color: var(--text-primary);">${newCustomers}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Đăng ký trong tháng ${month.split('-')[1]}/${month.split('-')[0]}</div>
           </div>
 
           <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; border-left: 4px solid #f59e0b;">
@@ -112,8 +116,8 @@ window.Pages.Reports = {
               <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">Đơn hàng</span>
               <span style="font-size: 20px;">🛒</span>
             </div>
-            <div style="font-size: 24px; font-weight: 800; color: var(--text-primary);">${wonCount}</div>
-            <div style="font-size: 12px; color: var(--text-muted);">Tỷ lệ chốt: ${dealsCount > 0 ? Math.round((wonCount / dealsCount) * 100) : 0}%</div>
+            <div style="font-size: 24px; font-weight: 800; color: var(--text-primary);">${orderCount}</div>
+            <div style="font-size: 12px; color: var(--text-muted);">Tỷ lệ chốt deal: ${winRate}%</div>
           </div>
 
           <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; border-left: 4px solid #8b5cf6;">
@@ -154,7 +158,36 @@ window.Pages.Reports = {
     `;
   },
 
+  _computeTurnover(employees) {
+    const month = Utils.getCurrentMonth();
+    const [y, m] = month.split('-').map(Number);
+    const prevMonth = m === 1 ? `${y - 1}-12` : `${y}-${String(m - 1).padStart(2, '0')}`;
+
+    const countInMonth = (list, monthStr, field) => {
+      const start = `${monthStr}-01`;
+      const end = Utils.getMonthEndDate(monthStr);
+      return list.filter(e => {
+        const date = (e[field] || '').substring(0, 10);
+        return date >= start && date <= end;
+      });
+    };
+
+    const hiredThis = countInMonth(employees, month, 'hireDate');
+    const leftThis = countInMonth(employees, month, 'exitDate');
+    const hiredPrev = countInMonth(employees, prevMonth, 'hireDate');
+    const leftPrev = countInMonth(employees, prevMonth, 'exitDate');
+    const active = employees.filter(e => e.status === 'active').length;
+    const turnover = active > 0 ? ((leftThis.length / active) * 100).toFixed(1) : '0.0';
+
+    return {
+      monthLabel: `Tháng ${m}/${y}`,
+      prevLabel: `Tháng ${prevMonth.split('-')[1]}/${prevMonth.split('-')[0]}`,
+      hiredThis, leftThis, hiredPrev, leftPrev, turnover
+    };
+  },
+
   _renderHRContent() {
+    const turnover = this._computeTurnover(this.data.employees || []);
     return `
       <div class="report-grid">
         <div class="card report-card">
@@ -200,20 +233,20 @@ window.Pages.Reports = {
           <div class="card-body" style="font-size: 13.5px;">
             <div style="display:flex; flex-direction:column; gap:12px;">
               <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
-                <span style="font-weight:600;">Tháng này (Tháng 7/2026)</span>
-                <span style="color:var(--color-success); font-weight:600;">+2 Mới / -0 Nghỉ</span>
+                <span style="font-weight:600;">${turnover.monthLabel}</span>
+                <span style="color:var(--color-success); font-weight:600;">+${turnover.hiredThis.length} Mới / -${turnover.leftThis.length} Nghỉ</span>
               </div>
               <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
                 <span style="color:var(--text-secondary);">Nhân viên mới tuyển:</span>
-                <span style="font-weight:500;">Test Employee V7, Test Employee Insert</span>
+                <span style="font-weight:500;">${turnover.hiredThis.length ? turnover.hiredThis.map(e => e.name).join(', ') : 'Không có'}</span>
               </div>
               <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
-                <span style="font-weight:600;">Tháng trước (Tháng 6/2026)</span>
-                <span style="color:var(--color-warning); font-weight:600;">+1 Mới / -1 Nghỉ</span>
+                <span style="font-weight:600;">${turnover.prevLabel}</span>
+                <span style="color:var(--color-warning); font-weight:600;">+${turnover.hiredPrev.length} Mới / -${turnover.leftPrev.length} Nghỉ</span>
               </div>
               <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
                 <span style="color:var(--text-secondary);">Tỷ lệ nghỉ việc (Turnover Rate):</span>
-                <span style="font-weight:600; color:var(--color-danger);">7.1%</span>
+                <span style="font-weight:600; color:var(--color-danger);">${turnover.turnover}%</span>
               </div>
             </div>
           </div>
@@ -240,7 +273,12 @@ window.Pages.Reports = {
         depts: await Store.getDepartments(),
         employees: await Store.getEmployees(),
         notes: await Store.getAllCustomerNotes(),
-        contactsCount: await Store.getAllCustomerContactsCount()
+        orders: await Store.getAllCustomerOrders(),
+        contactsCount: await Store.getAllCustomerContactsCount(),
+        attendance: await Store.getAttendanceRecords({
+          startDate: Utils.getDateOffset(-6),
+          endDate: Utils.getCurrentDate()
+        })
       };
       
       container.innerHTML = await this._renderContent();
@@ -298,9 +336,8 @@ window.Pages.Reports = {
   },
 
   initHRCharts(data) {
-    const { depts, employees } = data;
+    const { depts, employees, attendance = [] } = data;
 
-    // 1. Dept Ratio (Including exact count and percentage in legends)
     const totalEmps = employees.length || 1;
     const deptLabels = depts.map(d => {
       const count = employees.filter(e => e.departmentId === d.id).length;
@@ -317,39 +354,44 @@ window.Pages.Reports = {
       }]
     });
 
-    // 2. Attendance Trend 7 Days (Mock data for visual)
     const attLabels = [];
-    for(let i=6; i>=0; i--) {
-      const d = new Date();
-      d.setDate(d.getDate() - i);
-      attLabels.push(Utils.formatDate(d.toISOString().split('T')[0]));
+    const onTimeData = [];
+    const lateData = [];
+    for (let i = 6; i >= 0; i--) {
+      const dateStr = Utils.getDateOffset(-i);
+      attLabels.push(Utils.formatDate(dateStr));
+      const dayRecords = attendance.filter(a => a.date === dateStr);
+      onTimeData.push(dayRecords.filter(a => a.status === 'on_time').length);
+      lateData.push(dayRecords.filter(a => a.status === 'late').length);
     }
     
     Charts.line('chartAttendanceTrend', {
       labels: attLabels,
       datasets: [
-        {
-          label: 'Đi làm đúng giờ',
-          data: [12, 14, 13, 14, 14, 11, 14],
-          borderColor: '#10b981',
-          tension: 0.3
-        },
-        {
-          label: 'Đi muộn',
-          data: [1, 0, 2, 0, 0, 1, 0],
-          borderColor: '#f59e0b',
-          tension: 0.3
-        }
+        { label: 'Đi làm đúng giờ', data: onTimeData, borderColor: '#10b981', tension: 0.3 },
+        { label: 'Đi muộn', data: lateData, borderColor: '#f59e0b', tension: 0.3 }
       ]
     });
 
-    // 3. OLE (Overall Labor Effectiveness) by department
-    // HR: 82%, Sales: 78%, Marketing: 75%, IT: 72%, Customer Service: 71%
+    const month = Utils.getCurrentMonth();
+    const oleLabels = depts.map(d => d.name);
+    const oleData = depts.map(d => {
+      const deptEmps = employees.filter(e => e.departmentId === d.id && e.status === 'active');
+      if (!deptEmps.length) return 0;
+      const workDays = Utils.getWorkingDaysInMonth(month);
+      const rates = deptEmps.map(emp => {
+        const empAtt = attendance.filter(a => a.employeeId === emp.id && a.date.startsWith(month));
+        const present = empAtt.filter(a => a.status === 'on_time' || a.status === 'late').length;
+        return empAtt.length ? Math.round((present / workDays) * 100) : 0;
+      });
+      return Math.round(rates.reduce((s, r) => s + r, 0) / rates.length);
+    });
+
     Charts.bar('chartOLEPerformance', {
-      labels: ['Hành chính - Nhân sự', 'Kinh doanh (Sales)', 'Marketing', 'Công nghệ thông tin', 'Chăm sóc khách hàng'],
+      labels: oleLabels,
       datasets: [{
-        label: 'Tỷ lệ OLE (%)',
-        data: [82, 78, 75, 72, 71],
+        label: 'Tỷ lệ chuyên cần (%)',
+        data: oleData,
         backgroundColor: '#6366f1'
       }]
     });

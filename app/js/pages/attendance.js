@@ -52,7 +52,13 @@ window.Pages.Attendance = {
     try {
       const today = Utils.getCurrentDate();
       const records = await Store.getAttendanceRecords({ date: today });
-      const employees = await Store.getEmployees({ status: 'active' });
+      let employees = await Store.getEmployees({ status: 'active' });
+
+      if (Store.currentUser?.role === 'employee') {
+        employees = employees.filter(e => e.id === Store.currentUser.id);
+      } else if (Store.currentUser?.role === 'manager') {
+        employees = employees.filter(e => e.departmentId === Store.currentUser.departmentId);
+      }
 
       // Build real-time clock
       const clockHtml = `
@@ -63,8 +69,8 @@ window.Pages.Attendance = {
           <div class="attendance-actions">
             <div style="flex:1;max-width:300px;">
               <select id="attEmployeeSelect" class="form-input">
-                <option value="">-- Chọn nhân viên để test --</option>
-                ${employees.map(e => `<option value="${e.id}">${e.name} (${e.position || 'NV'})</option>`).join('')}
+                <option value="">-- Chọn nhân viên --</option>
+                ${employees.map(e => `<option value="${e.id}" ${Store.currentUser?.role === 'employee' && Store.currentUser.id === e.id ? 'selected' : ''}>${e.name} (${e.position || 'NV'})</option>`).join('')}
               </select>
             </div>
             <button class="btn btn-checkin" onclick="window.Pages.Attendance.doCheckIn()">
