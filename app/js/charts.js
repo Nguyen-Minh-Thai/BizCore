@@ -243,8 +243,9 @@ window.Charts = {
       ctx.fillStyle = '#64748b'; ctx.font = '11px Inter,sans-serif';
       ctx.fillText('Tổng', cx, cy + 18);
 
-      // Vẽ các chú thích chỉ dẫn (Leader Lines & Text labels) ở 2 bên biểu đồ
-      if (progress >= 1) {
+      // Vẽ các chú thích chỉ dẫn (Leader Lines & Text labels) ở 2 bên biểu đồ với hiệu ứng động vẽ đường đi và fade-in chữ
+      if (progress >= 0.6) {
+        const p = (progress - 0.6) / 0.4; // Tiến trình chú thích chạy từ 0 đến 1 khi progress từ 0.6 đến 1.0
         let startAngle = -Math.PI / 2;
         data.forEach((val, i) => {
           const slice = (val / total) * Math.PI * 2;
@@ -253,11 +254,11 @@ window.Charts = {
           if (val > 0) {
             const angle = startAngle + slice / 2;
             
-            // Điểm bắt đầu (sx, sy) nằm ở rìa phân khúc tròn
+            // Điểm bắt đầu (sx, sy)
             const sx = cx + Math.cos(angle) * radius;
             const sy = cy + Math.sin(angle) * radius;
             
-            // Điểm bẻ góc (ex, ey) đi chéo ra ngoài
+            // Điểm bẻ góc (ex, ey)
             const distOut = radius + 16;
             const ex = cx + Math.cos(angle) * distOut;
             const ey = cy + Math.sin(angle) * distOut;
@@ -267,33 +268,56 @@ window.Charts = {
             const lineLength = 20;
             const hx = isLeft ? ex - lineLength : ex + lineLength;
             
-            // Vẽ đường chỉ dẫn
+            // 1. Phân đoạn chéo: tiến trình từ 0 đến 0.5 của p
+            const p1 = Math.min(1, p / 0.5);
+            const dx = sx + (ex - sx) * p1;
+            const dy = sy + (ey - sy) * p1;
+            
             const color = (colors && colors[i]) || this.COLORS[i % this.COLORS.length];
             ctx.strokeStyle = color;
             ctx.lineWidth = 1.3;
             ctx.beginPath();
             ctx.moveTo(sx, sy);
-            ctx.lineTo(ex, ey);
-            ctx.lineTo(hx, ey);
+            ctx.lineTo(dx, dy);
             ctx.stroke();
             
-            // Lấy tên thành phần ngắn gọn từ nhãn đầy đủ
-            const fullLabel = labels[i] || '';
-            const cleanName = fullLabel.split(' (')[0];
+            // 2. Phân đoạn ngang: tiến trình từ 0.5 đến 1.0 của p
+            if (p > 0.5) {
+              const p2 = Math.min(1, (p - 0.5) / 0.5);
+              const hx_curr = ex + (hx - ex) * p2;
+              
+              ctx.beginPath();
+              ctx.moveTo(ex, ey);
+              ctx.lineTo(hx_curr, ey);
+              ctx.stroke();
+            }
             
-            // Viết chữ chú thích ở đầu đường chỉ dẫn ngang
-            ctx.fillStyle = '#1e293b'; // Slate-800
-            ctx.textAlign = isLeft ? 'right' : 'left';
-            ctx.textBaseline = 'middle';
-            
-            // Dòng 1: Tên thành phần
-            ctx.font = 'bold 10.5px Inter,sans-serif';
-            ctx.fillText(cleanName, isLeft ? hx - 5 : hx + 5, ey - 6);
-            
-            // Dòng 2: Giá trị và %
-            ctx.fillStyle = '#64748b'; // Slate-500
-            ctx.font = '500 9.5px Inter,sans-serif';
-            ctx.fillText(`${val} (${pct}%)`, isLeft ? hx - 5 : hx + 5, ey + 6);
+            // 3. Fade-in chú thích chữ: tiến trình từ 0.8 đến 1.0 của p
+            if (p > 0.8) {
+              const alpha = Math.min(1, (p - 0.8) / 0.2);
+              ctx.save();
+              ctx.globalAlpha = alpha;
+              
+              // Lấy tên thành phần ngắn gọn từ nhãn đầy đủ
+              const fullLabel = labels[i] || '';
+              const cleanName = fullLabel.split(' (')[0];
+              
+              // Viết chữ chú thích ở đầu đường chỉ dẫn ngang
+              ctx.fillStyle = '#1e293b'; // Slate-800
+              ctx.textAlign = isLeft ? 'right' : 'left';
+              ctx.textBaseline = 'middle';
+              
+              // Dòng 1: Tên thành phần
+              ctx.font = 'bold 10.5px Inter,sans-serif';
+              ctx.fillText(cleanName, isLeft ? hx - 5 : hx + 5, ey - 6);
+              
+              // Dòng 2: Giá trị và %
+              ctx.fillStyle = '#64748b'; // Slate-500
+              ctx.font = '500 9.5px Inter,sans-serif';
+              ctx.fillText(`${val} (${pct}%)`, isLeft ? hx - 5 : hx + 5, ey + 6);
+              
+              ctx.restore();
+            }
           }
           startAngle += slice;
         });

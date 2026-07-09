@@ -870,3 +870,16 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
   * Căn giữa biểu đồ tròn (`cx = w / 2`), loại bỏ chú thích dạng danh sách bên phải.
   * Tự động tính toán góc trung vị của từng lát cắt để vẽ một đường chỉ dẫn (`Leader Line`) mảnh đi chéo ra ngoài, bẻ góc nằm ngang hướng về hai bên trái/phải.
   * Vẽ nhãn văn bản ở đầu đường chỉ dẫn (Dòng 1: Tên thành phần màu xám Slate-800 `#1e293b`; Dòng 2: Giá trị và tỷ lệ phần trăm màu Slate-500 `#64748b`), giúp biểu đồ trông cân đối, chuyên nghiệp và cực kỳ trực quan mà không bị chồng chéo chữ.
+
+---
+
+## 20. Phần bổ sung Giai đoạn 20 (Hiệu ứng chuyển động động vẽ đường chỉ dẫn và Fade-in nhãn)
+
+### File: `app/js/charts.js`
+
+#### Mục 20.1: Phân rã tiến trình vẽ đường chỉ dẫn và làm mờ dần nhãn chữ
+* **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`)
+* **Lý do:**
+  * Đồng bộ chuyển động mượt mà với hoạt ảnh quay tròn của Doughnut Chart.
+  * Khi tiến trình đạt `0.6` đến `1.0`: Đầu tiên vẽ nét chéo từ lát cắt ra ngoài (trong 50% tiến trình đầu), sau đó vẽ tiếp nét ngang (trong 50% tiến trình tiếp theo).
+  * Cuối cùng, nhãn văn bản ở đầu dòng sẽ tự động xuất hiện với hiệu ứng mờ dần (`globalAlpha` tăng từ `0` lên `1` ở 20% tiến trình cuối), giúp trải nghiệm trực quan hóa dữ liệu trở nên cực kỳ sinh động, tinh tế và cao cấp.
