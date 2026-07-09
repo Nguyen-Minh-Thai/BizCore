@@ -2,6 +2,34 @@
 window.Charts = {
   COLORS: ['#6366f1','#8b5cf6','#10b981','#f59e0b','#ef4444','#3b82f6','#ec4899','#14b8a6','#f97316','#06b6d4'],
 
+  _hexToRgb(hex) {
+    hex = hex.replace('#', '');
+    if (hex.length === 3) {
+      hex = hex.split('').map(c => c + c).join('');
+    }
+    const num = parseInt(hex, 16);
+    return {
+      r: (num >> 16) & 255,
+      g: (num >> 8) & 255,
+      b: num & 255
+    };
+  },
+  
+  _rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  },
+
+  _adjustColor(hex, percent) {
+    try {
+      const rgb = this._hexToRgb(hex);
+      const r = Math.min(255, Math.max(0, Math.round(rgb.r * (1 + percent))));
+      const g = Math.min(255, Math.max(0, Math.round(rgb.g * (1 + percent))));
+      const b = Math.min(255, Math.max(0, Math.round(rgb.b * (1 + percent))));
+      return this._rgbToHex(r, g, b);
+    } catch(e) {
+      return hex;
+    }
+  },
   _setup(canvasId, minH) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return null;
@@ -232,7 +260,22 @@ window.Charts = {
         ctx.arc(cx, cy, radius, startAngle + actualGap, startAngle + slice - actualGap);
         ctx.arc(cx, cy, innerRadius, startAngle + slice - actualGap, startAngle + actualGap, true);
         ctx.closePath();
-        ctx.fillStyle = (colors && colors[i]) || this.COLORS[i % this.COLORS.length];
+        const baseColor = (colors && colors[i]) || this.COLORS[i % this.COLORS.length];
+        
+        // Tạo dải màu gradient tuyến tính dọc theo bán kính lát cắt (từ trong ra ngoài)
+        const midAngle = startAngle + slice / 2;
+        const x1 = cx + Math.cos(midAngle) * innerRadius;
+        const y1 = cy + Math.sin(midAngle) * innerRadius;
+        const x2 = cx + Math.cos(midAngle) * radius;
+        const y2 = cy + Math.sin(midAngle) * radius;
+        
+        const grad = ctx.createLinearGradient(x1, y1, x2, y2);
+        const lightColor = this._adjustColor(baseColor, 0.28);
+        const darkColor = this._adjustColor(baseColor, -0.18);
+        grad.addColorStop(0, lightColor);
+        grad.addColorStop(1, darkColor);
+        
+        ctx.fillStyle = grad;
         ctx.fill();
         startAngle += slice;
       });

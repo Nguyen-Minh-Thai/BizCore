@@ -883,3 +883,16 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
   * Đồng bộ chuyển động mượt mà với hoạt ảnh quay tròn của Doughnut Chart.
   * Khi tiến trình đạt `0.6` đến `1.0`: Đầu tiên vẽ nét chéo từ lát cắt ra ngoài (trong 50% tiến trình đầu), sau đó vẽ tiếp nét ngang (trong 50% tiến trình tiếp theo).
   * Cuối cùng, nhãn văn bản ở đầu dòng sẽ tự động xuất hiện với hiệu ứng mờ dần (`globalAlpha` tăng từ `0` lên `1` ở 20% tiến trình cuối), giúp trải nghiệm trực quan hóa dữ liệu trở nên cực kỳ sinh động, tinh tế và cao cấp.
+
+---
+
+## 21. Phần bổ sung Giai đoạn 21 (Nâng cấp phối màu Gradient 3D cho Doughnut Slices)
+
+### File: `app/js/charts.js`
+
+#### Mục 21.1: Tích hợp Linear Gradient dọc theo bán kính từng lát cắt
+* **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`, phần vẽ vòng tròn)
+* **Lý do:** 
+  * Định nghĩa thêm các hàm tiện ích nội bộ `_hexToRgb`, `_rgbToHex`, và `_adjustColor` để biến đổi độ sáng của mã màu hex bất kỳ.
+  * Với mỗi lát cắt, tự động thiết lập dải màu `CanvasGradient` đi từ rìa trong ra rìa ngoài (`LinearGradient` dọc theo góc trung vị từ `innerRadius` đến `radius`).
+  * Đầu trong dải màu được tăng 28% độ sáng (`_adjustColor(baseColor, 0.28)`), đầu ngoài dải màu được làm đậm 18% (`_adjustColor(baseColor, -0.18)`), tạo ra hiệu ứng 3D khối bóng mượt, hiện đại và sang trọng, vượt trội hơn hẳn so với phong cách tô màu phẳng (flat color) đơn điệu cũ.
