@@ -984,4 +984,14 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 * **Vị trí:** `reports.js` (Hàm `initHRCharts` của đối tượng `Reports`, phần khai báo `chartOLEPerformance`)
 * **Lý do:** Đồng bộ hóa màu sắc cột của biểu đồ **Hiệu quả lao động tổng thể (OLE) theo bộ phận** sang màu **xanh ngọc Teal (`#14b8a6`)** - màu xanh của nguồn khách hàng *Mạng xã hội* theo đúng danh sách yêu cầu mới từ người dùng.
 
+---
+
+## 29. Phần bổ sung Giai đoạn 29 (Đồng bộ màu biểu đồ Tỷ lệ nhân sự theo phòng ban với Khách hàng theo nguồn)
+
+### File: `app/js/pages/reports.js`
+
+#### Mục 29.1: Cập nhật màu sắc doughnut chart Tỷ lệ nhân sự sang dải màu xanh lá và xanh ngọc
+* **Vị trí:** `reports.js` (Hàm `initHRCharts` của đối tượng `Reports`, phần khai báo `chartDeptRatio`)
+* **Lý do:** Thiết lập lại dải màu hiển thị các phòng ban tương thích hoàn toàn với dải màu của biểu đồ **Khách hàng theo nguồn** (`['#3b82f6', '#10b981', '#34d399', '#14b8a6', '#059669', '#94a3b8']`) để tạo tính thống nhất, đồng bộ tối đa cho giao diện báo cáo.
+
 

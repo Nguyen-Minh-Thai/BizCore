@@ -366,7 +366,7 @@ window.Pages.Reports = {
       labels: deptLabels,
       datasets: [{
         data: deptCounts,
-        backgroundColor: ['#6366f1', '#8b5cf6', '#a78bfa', '#c4b5fd', '#818cf8', '#6ee7b7', '#fbbf24', '#f87171']
+        backgroundColor: ['#3b82f6', '#10b981', '#34d399', '#14b8a6', '#059669', '#94a3b8']
       }]
     });
 
