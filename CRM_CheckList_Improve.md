@@ -847,3 +847,13 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 #### Mục 17.1: Thay đổi mã màu text nhãn nội bộ (Inner Slice Labels) thành màu đen
 * **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`, phần vẽ chữ nhãn bên trong lát cắt)
 * **Lý do:** Chuyển đổi mã màu vẽ nhãn chữ (như `Thất bại 17%`, `Lead 17%`...) bên trong các phân khúc tròn (Doughnut slices) từ màu trắng `#ffffff` sang màu đen `#000000` để đáp ứng chuẩn xác mong muốn hiển thị màu đen của người dùng.
+
+---
+
+## 18. Phần bổ sung Giai đoạn 18 (Cải thiện độ tương phản và độ mềm mại của nhãn biểu đồ tròn)
+
+### File: `app/js/charts.js`
+
+#### Mục 18.1: Chuyển đổi màu chữ nội bộ từ đen đậm sang xám Slate-800
+* **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`, phần vẽ chữ nhãn bên trong lát cắt)
+* **Lý do:** Màu đen đậm `#000000` trước đó gây tương phản quá mạnh và hơi thô trên các lát cắt sáng màu (như xanh ngọc, tím pastel). Chuyển sang màu xám đen Slate-800 (`#1e293b`) giúp nhãn hiển thị mềm mại, chuyên nghiệp, giữ được độ sắc nét và rõ ràng vượt trội so với màu trắng cũ mà không gây khó chịu cho mắt.
