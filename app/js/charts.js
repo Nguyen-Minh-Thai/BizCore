@@ -252,7 +252,7 @@ window.Charts = {
             const dist = (radius + innerRadius) / 2;
             const lx = cx + Math.cos(angle) * dist;
             const ly = cy + Math.sin(angle) * dist;
-            ctx.fillStyle = '#ffffff';
+            ctx.fillStyle = '#000000';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             

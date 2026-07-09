@@ -837,3 +837,13 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 #### Mục 16.1: Thay đổi mã màu text chú thích (Legend Labels & Subtext) trong Canvas Doughnut Chart
 * **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`)
 * **Lý do:** Đổi mã màu hiển thị nhãn chú thích bên phải của biểu đồ tròn (gồm: Cơ hội theo giai đoạn, Khách hàng theo nguồn, Tỷ lệ nhân sự theo phòng ban) từ màu trắng `#f1f5f9` và xám nhạt `#94a3b8` sang màu đen đậm `#000000` (subtext `#4b5563`) để tăng độ tương phản rõ rệt, giúp dễ đọc trên nền sáng.
+
+---
+
+## 17. Phần bổ sung Giai đoạn 17 (Chuyển màu chữ bên trong lát cắt Doughnut Chart sang màu đen)
+
+### File: `app/js/charts.js`
+
+#### Mục 17.1: Thay đổi mã màu text nhãn nội bộ (Inner Slice Labels) thành màu đen
+* **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`, phần vẽ chữ nhãn bên trong lát cắt)
+* **Lý do:** Chuyển đổi mã màu vẽ nhãn chữ (như `Thất bại 17%`, `Lead 17%`...) bên trong các phân khúc tròn (Doughnut slices) từ màu trắng `#ffffff` sang màu đen `#000000` để đáp ứng chuẩn xác mong muốn hiển thị màu đen của người dùng.
