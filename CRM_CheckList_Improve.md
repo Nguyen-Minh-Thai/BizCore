@@ -952,3 +952,13 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
   * Đồng bộ hóa màu sắc biểu diễn của biểu đồ **Hiệu quả lao động tổng thể (OLE) theo bộ phận** và biểu đồ **Thống kê Chấm công 7 ngày qua** (đường "Đi làm đúng giờ") sang tông màu xanh lá mạ / xanh ngọc của Kinh doanh (`#6ee7b7`), thay thế cho màu xanh dương đậm `#6366f1` cũ.
   * Sửa tham số truyền vào của biểu đồ line `chartAttendanceTrend` từ `borderColor` (sai tham số dẫn tới fallback màu mặc định) thành `color: '#6ee7b7'` để hiển thị chính xác màu xanh lá mạ Kinh doanh.
 
+---
+
+## 26. Phần bổ sung Giai đoạn 26 (Khắc phục thuộc tính màu OLE Bar Chart)
+
+### File: `app/js/pages/reports.js`
+
+#### Mục 26.1: Thay đổi thuộc tính màu OLE từ backgroundColor sang color để Canvas nhận diện
+* **Vị trí:** `reports.js` (Hàm `initHRCharts` của đối tượng `Reports`, phần khai báo `chartOLEPerformance`)
+* **Lý do:** Thư viện Canvas tự phát triển (`charts.js`) chỉ nhận diện thuộc tính `color` cho đối tượng dataset của Bar Chart thay vì `backgroundColor`. Lỗi này khiến màu xanh lá mạ Kinh doanh `#6ee7b7` bị bỏ qua và biểu đồ tự động fallback về màu tím mặc định. Đã chuyển đổi chính xác sang `color: '#6ee7b7'`.
+
