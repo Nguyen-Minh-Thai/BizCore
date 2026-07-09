@@ -1,6 +1,11 @@
 # Local configuration
 app/js/config.local.js
 
+# Vercel
+.vercel
+deploy-tmp
+
 # OS files
 .DS_Store
 Thumbs.db
+
