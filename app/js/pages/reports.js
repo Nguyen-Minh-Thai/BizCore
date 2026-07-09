@@ -384,8 +384,8 @@ window.Pages.Reports = {
     Charts.line('chartAttendanceTrend', {
       labels: attLabels,
       datasets: [
-        { label: 'Đi làm đúng giờ', data: onTimeData, borderColor: '#10b981', tension: 0.3 },
-        { label: 'Đi muộn', data: lateData, borderColor: '#f59e0b', tension: 0.3 }
+        { label: 'Đi làm đúng giờ', data: onTimeData, color: '#6ee7b7', tension: 0.3 },
+        { label: 'Đi muộn', data: lateData, color: '#f59e0b', tension: 0.3 }
       ]
     });
 
@@ -408,7 +408,7 @@ window.Pages.Reports = {
       datasets: [{
         label: 'Tỷ lệ chuyên cần (%)',
         data: oleData,
-        backgroundColor: '#6366f1'
+        backgroundColor: '#6ee7b7'
       }]
     });
   },

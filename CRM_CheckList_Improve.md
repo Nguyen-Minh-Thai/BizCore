@@ -939,3 +939,16 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 #### Mục 24.2: Đồng bộ bảng màu xanh lá/teal cho biểu đồ Khách hàng theo nguồn
 * **Vị trí:** `reports.js` (Hàm `initRevenueCharts` của đối tượng `Reports`)
 * **Lý do:** Thay đổi mã màu của Nền tảng Zalo (từ vàng `#fbbf24` sang xanh mint `#34d399`) và Mạng xã hội (từ hồng `#ec4899` sang xanh teal `#14b8a6`) để biểu đồ tổng thể có sự hòa hợp tuyệt đối với gam màu xanh lá chủ đạo (`#10b981` / `#059669`) của ứng dụng BizCore.
+
+---
+
+## 25. Phần bổ sung Giai đoạn 25 (Đồng bộ màu sắc Xanh Kinh Doanh cho Biểu đồ OLE và Chấm Công)
+
+### File: `app/js/pages/reports.js`
+
+#### Mục 25.1: Cập nhật màu sắc cột OLE và đường nét Chấm công sang màu xanh lá Kinh doanh
+* **Vị trí:** `reports.js` (Hàm `initHRCharts` của đối tượng `Reports`)
+* **Lý do:**
+  * Đồng bộ hóa màu sắc biểu diễn của biểu đồ **Hiệu quả lao động tổng thể (OLE) theo bộ phận** và biểu đồ **Thống kê Chấm công 7 ngày qua** (đường "Đi làm đúng giờ") sang tông màu xanh lá mạ / xanh ngọc của Kinh doanh (`#6ee7b7`), thay thế cho màu xanh dương đậm `#6366f1` cũ.
+  * Sửa tham số truyền vào của biểu đồ line `chartAttendanceTrend` từ `borderColor` (sai tham số dẫn tới fallback màu mặc định) thành `color: '#6ee7b7'` để hiển thị chính xác màu xanh lá mạ Kinh doanh.
+
