@@ -896,3 +896,13 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
   * Định nghĩa thêm các hàm tiện ích nội bộ `_hexToRgb`, `_rgbToHex`, và `_adjustColor` để biến đổi độ sáng của mã màu hex bất kỳ.
   * Với mỗi lát cắt, tự động thiết lập dải màu `CanvasGradient` đi từ rìa trong ra rìa ngoài (`LinearGradient` dọc theo góc trung vị từ `innerRadius` đến `radius`).
   * Đầu trong dải màu được tăng 28% độ sáng (`_adjustColor(baseColor, 0.28)`), đầu ngoài dải màu được làm đậm 18% (`_adjustColor(baseColor, -0.18)`), tạo ra hiệu ứng 3D khối bóng mượt, hiện đại và sang trọng, vượt trội hơn hẳn so với phong cách tô màu phẳng (flat color) đơn điệu cũ.
+
+---
+
+## 22. Phần bổ sung Giai đoạn 22 (Định nghĩa class tiện ích p-6 giải quyết lỗi đè chữ xem lịch)
+
+### File: `app/css/base.css`
+
+#### Mục 22.1: Bổ sung lớp tiện ích .p-6 thiết lập padding cho các Card chứa Select Option
+* **Vị trí:** `base.css` (Dòng 91)
+* **Lý do:** Khắc phục lỗi hiển thị nhãn chữ `"Chọn nhân viên xem lịch"` bị chạm/đè lên đường viền trên của thẻ card (do thẻ sử dụng class `.p-6` nhưng class này chưa hề được định nghĩa trong hệ thống CSS). Thiết lập `.p-6 { padding: var(--space-6) !important; }` để tạo khoảng đệm trong 24px hợp lý cho toàn bộ các Card sử dụng lớp này, trả lại giao diện cân đối, thoáng đãng.
