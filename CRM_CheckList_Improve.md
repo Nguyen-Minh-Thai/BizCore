@@ -925,3 +925,17 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
   * `supabase-store.js` (`getDeals`, `getDeal`, `addDeal`, `updateDeal`): Truy vấn và lưu thuộc tính `lead_source` của bảng `deals`.
   * `deals.js`: Thêm thẻ `<select id="dealLeadSource">` chứa 5 nguồn chính dưới ô `"Lý do biết đến công ty"` trong tab Lead/Mới, đồng thời thu thập lưu trữ giá trị này khi lưu deal.
   * `reports.js`: Sửa đổi logic tính toán của biểu đồ **Khách hàng theo nguồn** (`chartCustomerSource`), chuyển từ việc đếm từ bảng `customers` sang đếm trực tiếp thuộc tính `leadSource` từ danh sách `deals`.
+
+---
+
+## 24. Phần bổ sung Giai đoạn 24 (Lược bỏ viền màu thẻ Tỷ lệ chuyển đổi và Thay đổi bảng màu Nguồn khách)
+
+### File: `app/js/pages/reports.js`
+
+#### Mục 24.1: Xóa bỏ border-left của 4 card Tỷ lệ chuyển đổi
+* **Vị trí:** `reports.js` (Hàm `_renderRevenueTab` của đối tượng `Reports`)
+* **Lý do:** Loại bỏ các thanh viền màu dọc (`border-left`) ở lề trái của 4 thẻ thống kê trên cùng (Khách hàng mới, Tương tác, Đơn hàng, Doanh số) theo đúng yêu cầu thiết kế tối giản của người dùng.
+
+#### Mục 24.2: Đồng bộ bảng màu xanh lá/teal cho biểu đồ Khách hàng theo nguồn
+* **Vị trí:** `reports.js` (Hàm `initRevenueCharts` của đối tượng `Reports`)
+* **Lý do:** Thay đổi mã màu của Nền tảng Zalo (từ vàng `#fbbf24` sang xanh mint `#34d399`) và Mạng xã hội (từ hồng `#ec4899` sang xanh teal `#14b8a6`) để biểu đồ tổng thể có sự hòa hợp tuyệt đối với gam màu xanh lá chủ đạo (`#10b981` / `#059669`) của ứng dụng BizCore.

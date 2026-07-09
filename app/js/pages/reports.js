@@ -91,7 +91,7 @@ window.Pages.Reports = {
         <div style="font-weight: 600; font-size: 15px; margin-bottom: 12px; color: var(--text-primary);">Tỷ lệ chuyển đổi tháng này</div>
         <div class="stat-cards-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px;">
           
-          <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; border-left: 4px solid #3b82f6;">
+          <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">Khách hàng mới</span>
               <span style="font-size: 20px;">👤</span>
@@ -100,7 +100,7 @@ window.Pages.Reports = {
             <div style="font-size: 12px; color: var(--text-muted);">Đăng ký trong tháng ${month.split('-')[1]}/${month.split('-')[0]}</div>
           </div>
 
-          <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; border-left: 4px solid #f59e0b;">
+          <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">Tương tác</span>
               <span style="font-size: 20px;">📊</span>
@@ -111,7 +111,7 @@ window.Pages.Reports = {
             </div>
           </div>
 
-          <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; border-left: 4px solid #10b981;">
+          <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">Đơn hàng</span>
               <span style="font-size: 20px;">🛒</span>
@@ -120,7 +120,7 @@ window.Pages.Reports = {
             <div style="font-size: 12px; color: var(--text-muted);">Tỷ lệ chốt deal: ${winRate}%</div>
           </div>
 
-          <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px; border-left: 4px solid #8b5cf6;">
+          <div class="card" style="padding: 16px; display: flex; flex-direction: column; gap: 8px;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">Doanh số</span>
               <span style="font-size: 20px;">💵</span>
@@ -347,7 +347,7 @@ window.Pages.Reports = {
     Charts.doughnut('chartCustomerSource', {
       labels: Object.keys(activeSources),
       data: Object.values(activeSources),
-      colors: ['#38bdf8', '#10b981', '#fbbf24', '#ec4899', '#8b5cf6', '#94a3b8']
+      colors: ['#3b82f6', '#10b981', '#34d399', '#14b8a6', '#059669', '#94a3b8']
     });
   },
 
