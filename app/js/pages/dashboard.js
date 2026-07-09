@@ -191,7 +191,7 @@ window.Pages.Dashboard = {
           Charts.bar('chartEmployeeDept', {
             labels: departments.map(d => d.name),
             datasets:[{ label:'Nhân viên', data: departments.map(d=>employees.filter(e=>e.departmentId===d.id).length),
-              backgroundColor:['#0c6b57','#33417a','#a97c3f','#1a6a63','#3d4d90','#0e7a63','#c78a3c','#5a626c'] }]
+              color: '#14b8a6' }]
           });
           const deals = await Store.getDeals();
           const byStage = await Store.getDealsByStage();

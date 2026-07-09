@@ -962,3 +962,16 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 * **Vị trí:** `reports.js` (Hàm `initHRCharts` của đối tượng `Reports`, phần khai báo `chartOLEPerformance`)
 * **Lý do:** Thư viện Canvas tự phát triển (`charts.js`) chỉ nhận diện thuộc tính `color` cho đối tượng dataset của Bar Chart thay vì `backgroundColor`. Lỗi này khiến màu xanh lá mạ Kinh doanh `#6ee7b7` bị bỏ qua và biểu đồ tự động fallback về màu tím mặc định. Đã chuyển đổi chính xác sang `color: '#6ee7b7'`.
 
+---
+
+## 27. Phần bổ sung Giai đoạn 27 (Đổi màu biểu đồ Doanh thu dự kiến và Nhân viên theo bộ phận sang màu xanh Mạng xã hội)
+
+### File: `app/js/pages/reports.js` & `app/js/pages/dashboard.js`
+
+#### Mục 27.1: Chuyển màu cột biểu đồ Doanh thu dự kiến và Nhân viên theo phòng ban sang xanh ngọc Teal
+* **Vị trí:**
+  * `reports.js` (Hàm `initRevenueCharts` của đối tượng `Reports`, phần khai báo `chartDealRevenue`)
+  * `dashboard.js` (Hàm `mount` của đối tượng `Dashboard`, phần khai báo `chartEmployeeDept`)
+* **Lý do:** Đồng bộ hóa hai biểu đồ cột này sang màu **xanh ngọc Teal (`#14b8a6`)** - là màu xanh của nguồn khách hàng *Mạng xã hội* mà người dùng mong muốn, thay thế cho dải màu đa sắc lộn xộn cũ.
+
+

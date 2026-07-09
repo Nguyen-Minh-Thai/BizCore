@@ -314,7 +314,7 @@ window.Pages.Reports = {
       datasets: [{
         label: 'Doanh thu dự kiến (VNĐ)',
         data: Object.values(stages),
-        backgroundColor: Object.keys(stages).map(k => stageColors[k])
+        color: '#14b8a6'
       }]
     });
 
