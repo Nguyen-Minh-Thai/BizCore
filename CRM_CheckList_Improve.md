@@ -857,3 +857,16 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 #### Mục 18.1: Chuyển đổi màu chữ nội bộ từ đen đậm sang xám Slate-800
 * **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`, phần vẽ chữ nhãn bên trong lát cắt)
 * **Lý do:** Màu đen đậm `#000000` trước đó gây tương phản quá mạnh và hơi thô trên các lát cắt sáng màu (như xanh ngọc, tím pastel). Chuyển sang màu xám đen Slate-800 (`#1e293b`) giúp nhãn hiển thị mềm mại, chuyên nghiệp, giữ được độ sắc nét và rõ ràng vượt trội so với màu trắng cũ mà không gây khó chịu cho mắt.
+
+---
+
+## 19. Phần bổ sung Giai đoạn 19 (Thiết kế đường chỉ dẫn Leader Lines cho Doughnut Chart)
+
+### File: `app/js/charts.js`
+
+#### Mục 19.1: Vẽ đường chỉ dẫn bẻ góc (Leader Lines) ra ngoài hai bên biểu đồ
+* **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`)
+* **Lý do:** 
+  * Căn giữa biểu đồ tròn (`cx = w / 2`), loại bỏ chú thích dạng danh sách bên phải.
+  * Tự động tính toán góc trung vị của từng lát cắt để vẽ một đường chỉ dẫn (`Leader Line`) mảnh đi chéo ra ngoài, bẻ góc nằm ngang hướng về hai bên trái/phải.
+  * Vẽ nhãn văn bản ở đầu đường chỉ dẫn (Dòng 1: Tên thành phần màu xám Slate-800 `#1e293b`; Dòng 2: Giá trị và tỷ lệ phần trăm màu Slate-500 `#64748b`), giúp biểu đồ trông cân đối, chuyên nghiệp và cực kỳ trực quan mà không bị chồng chéo chữ.

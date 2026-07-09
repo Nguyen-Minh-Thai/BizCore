@@ -204,7 +204,7 @@ window.Charts = {
   },
 
   doughnut(canvasId, config) {
-    const setup = this._setup(canvasId, config.options?.height || 250);
+    const setup = this._setup(canvasId, config.options?.height || 260);
     if (!setup) return;
     const { ctx, w, h } = setup;
     const labels = config.labels || [];
@@ -212,8 +212,10 @@ window.Charts = {
     const data = config.data || ds0.data || [];
     const colors = config.colors || ds0.backgroundColor || [];
     const total = data.reduce((s, v) => s + v, 0) || 1;
-    const cx = w * 0.38, cy = h / 2;
-    const radius = Math.min(cx - 20, cy - 20, 90);
+    
+    // Căn giữa biểu đồ tròn để chừa khoảng trống 2 bên vẽ chú thích chỉ dẫn
+    const cx = w / 2, cy = h / 2;
+    const radius = Math.min(cx - 95, cy - 35, 68);
     const innerRadius = radius * 0.62;
     const gap = 0.03;
 
@@ -235,42 +237,63 @@ window.Charts = {
         startAngle += slice;
       });
 
-      // Center text
-      ctx.fillStyle = '#f1f5f9'; ctx.font = 'bold 20px Inter,sans-serif'; ctx.textAlign = 'center';
+      // Center text (Thống kê tổng số lượng ở giữa hình tròn)
+      ctx.fillStyle = '#1e293b'; ctx.font = 'bold 20px Inter,sans-serif'; ctx.textAlign = 'center';
       ctx.fillText(total.toLocaleString(), cx, cy + 2);
-      ctx.fillStyle = '#94a3b8'; ctx.font = '11px Inter,sans-serif';
+      ctx.fillStyle = '#64748b'; ctx.font = '11px Inter,sans-serif';
       ctx.fillText('Tổng', cx, cy + 18);
 
-      // Draw slice percentages and component names inside doughnut slices
+      // Vẽ các chú thích chỉ dẫn (Leader Lines & Text labels) ở 2 bên biểu đồ
       if (progress >= 1) {
         let startAngle = -Math.PI / 2;
         data.forEach((val, i) => {
           const slice = (val / total) * Math.PI * 2;
           const pct = Math.round((val / total) * 100);
-          if (pct >= 5) {
+          
+          if (val > 0) {
             const angle = startAngle + slice / 2;
-            const dist = (radius + innerRadius) / 2;
-            const lx = cx + Math.cos(angle) * dist;
-            const ly = cy + Math.sin(angle) * dist;
-            ctx.fillStyle = '#1e293b';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
             
-            // Lấy tên thành phần sạch từ nhãn
+            // Điểm bắt đầu (sx, sy) nằm ở rìa phân khúc tròn
+            const sx = cx + Math.cos(angle) * radius;
+            const sy = cy + Math.sin(angle) * radius;
+            
+            // Điểm bẻ góc (ex, ey) đi chéo ra ngoài
+            const distOut = radius + 16;
+            const ex = cx + Math.cos(angle) * distOut;
+            const ey = cy + Math.sin(angle) * distOut;
+            
+            // Điểm kết thúc đường kẻ ngang (hx, ey)
+            const isLeft = Math.cos(angle) < 0;
+            const lineLength = 20;
+            const hx = isLeft ? ex - lineLength : ex + lineLength;
+            
+            // Vẽ đường chỉ dẫn
+            const color = (colors && colors[i]) || this.COLORS[i % this.COLORS.length];
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 1.3;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(ex, ey);
+            ctx.lineTo(hx, ey);
+            ctx.stroke();
+            
+            // Lấy tên thành phần ngắn gọn từ nhãn đầy đủ
             const fullLabel = labels[i] || '';
             const cleanName = fullLabel.split(' (')[0];
             
-            if (pct >= 12) {
-              // Vẽ cả Tên và % nếu lát cắt đủ rộng
-              ctx.font = 'bold 8.5px Inter,sans-serif';
-              ctx.fillText(cleanName, lx, ly - 5);
-              ctx.font = 'bold 9px Inter,sans-serif';
-              ctx.fillText(pct + '%', lx, ly + 5);
-            } else {
-              // Vẽ % nếu lát cắt hẹp hơn
-              ctx.font = 'bold 9.5px Inter,sans-serif';
-              ctx.fillText(pct + '%', lx, ly);
-            }
+            // Viết chữ chú thích ở đầu đường chỉ dẫn ngang
+            ctx.fillStyle = '#1e293b'; // Slate-800
+            ctx.textAlign = isLeft ? 'right' : 'left';
+            ctx.textBaseline = 'middle';
+            
+            // Dòng 1: Tên thành phần
+            ctx.font = 'bold 10.5px Inter,sans-serif';
+            ctx.fillText(cleanName, isLeft ? hx - 5 : hx + 5, ey - 6);
+            
+            // Dòng 2: Giá trị và %
+            ctx.fillStyle = '#64748b'; // Slate-500
+            ctx.font = '500 9.5px Inter,sans-serif';
+            ctx.fillText(`${val} (${pct}%)`, isLeft ? hx - 5 : hx + 5, ey + 6);
           }
           startAngle += slice;
         });
@@ -279,20 +302,5 @@ window.Charts = {
       if (progress < 1) requestAnimationFrame(animate);
     };
     animate();
-
-    // Legend (right side)
-    const legendX = w * 0.65;
-    let legendY = Math.max(30, cy - (labels.length * 24) / 2);
-    labels.forEach((label, i) => {
-      const color = (colors && colors[i]) || this.COLORS[i % this.COLORS.length];
-      ctx.fillStyle = color;
-      ctx.beginPath(); ctx.arc(legendX, legendY, 5, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#000000'; ctx.font = 'bold 12px Inter,sans-serif'; ctx.textAlign = 'left';
-      ctx.fillText(label, legendX + 14, legendY + 4);
-      ctx.fillStyle = '#4b5563'; ctx.font = 'bold 11px Inter,sans-serif'; // Dark grey/black for subtext
-      const pct = Math.round((data[i] / total) * 100);
-      ctx.fillText(`${data[i].toLocaleString()} (${pct}%)`, legendX + 14, legendY + 20);
-      legendY += 36;
-    });
   }
 };
