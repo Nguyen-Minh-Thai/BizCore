@@ -270,8 +270,8 @@ window.Charts = {
         const y2 = cy + Math.sin(midAngle) * radius;
         
         const grad = ctx.createLinearGradient(x1, y1, x2, y2);
-        const lightColor = this._adjustColor(baseColor, 0.28);
-        const darkColor = this._adjustColor(baseColor, -0.18);
+        const lightColor = this._adjustColor(baseColor, 0.10);
+        const darkColor = this._adjustColor(baseColor, -0.05);
         grad.addColorStop(0, lightColor);
         grad.addColorStop(1, darkColor);
         

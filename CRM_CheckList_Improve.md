@@ -994,4 +994,18 @@ Tài liệu này ghi lại chi tiết các thay đổi cấu trúc Database và 
 * **Vị trí:** `reports.js` (Hàm `initHRCharts` của đối tượng `Reports`, phần khai báo `chartDeptRatio`)
 * **Lý do:** Thiết lập lại dải màu hiển thị các phòng ban tương thích hoàn toàn với dải màu của biểu đồ **Khách hàng theo nguồn** (`['#3b82f6', '#10b981', '#34d399', '#14b8a6', '#059669', '#94a3b8']`) để tạo tính thống nhất, đồng bộ tối đa cho giao diện báo cáo.
 
+---
+
+## 30. Phần bổ sung Giai đoạn 30 (Giảm cường độ dải chuyển màu 3D cho biểu đồ tròn)
+
+### File: `app/js/charts.js`
+
+#### Mục 30.1: Tinh chỉnh độ tương phản Linear Gradient trên các lát cắt tròn mềm mại hơn
+* **Vị trí:** `charts.js` (Hàm `doughnut` của đối tượng `Charts`, phần vẽ vòng tròn)
+* **Lý do:** Giảm độ chênh lệch sáng/tối để biểu đồ có giao diện mượt mà và sang trọng hơn. 
+  - Điều chỉnh đầu trong (light) từ 28% xuống còn **10%** độ sáng (`_adjustColor(baseColor, 0.10)`).
+  - Điều chỉnh đầu ngoài (dark) từ -18% xuống còn **-5%** độ tối (`_adjustColor(baseColor, -0.05)`).
+  - Thay đổi này giúp giảm tương phản thô cứng, làm cho các lát cắt của biểu đồ tròn phẳng mịn, nhẹ nhàng và thanh thoát hơn.
+
+
 
